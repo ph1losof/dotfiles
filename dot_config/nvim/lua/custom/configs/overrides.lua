@@ -1,9 +1,11 @@
 local M = {}
 
+
 M.mason = {
 	ensure_installed = {
 		-- Lua
 		"lua-language-server",
+    "prisma-language-server",
 		"luacheck",
 		"stylua",
 

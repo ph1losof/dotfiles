@@ -15,8 +15,8 @@ vim.cmdheight = 1
 vim.scrolloff = 10
 vim.opt.expandtab = true
 vim.opt.showcmd = true
-vim.opt.backupskip = '/tmp/*,/private/tmp/*'
-vim.opt.inccommand = 'split'
+vim.opt.backupskip = "/tmp/*,/private/tmp/*"
+vim.opt.inccommand = "split"
 vim.opt.ignorecase = true
 vim.opt.smarttab = true
 vim.opt.smartindent = true
@@ -26,19 +26,19 @@ vim.opt.tabstop = 2
 vim.opt.ai = true
 vim.opt.si = true
 vim.opt.wrap = false
-vim.opt.backspace = 'start,eol,indent'
-vim.opt.path:append { "**" }
-vim.opt.wildignore:append { '*/node_modules/*,*/.history/*' }
+vim.opt.backspace = "start,eol,indent"
+vim.opt.path:append({ "**" })
+vim.opt.wildignore:append({ "*/node_modules/*,*/.history/*" })
 
 vim.opt.relativenumber = true
 
 vim.opt.undofile = true
 
-vim.opt.formatoptions:append { 'r' }
+vim.opt.formatoptions:append({ "r" })
 
-vim.opt.clipboard:append { 'unnamedplus' }
+vim.opt.clipboard:append({ "unnamedplus" })
 
 vim.opt.colorcolumn = "80"
 
 vim.opt.termguicolors = true
-
+vim.opt.mouse = ""
