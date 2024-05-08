@@ -1,11 +1,10 @@
 local M = {}
 
-
 M.mason = {
 	ensure_installed = {
 		-- Lua
 		"lua-language-server",
-    "prisma-language-server",
+		"prisma-language-server",
 		"luacheck",
 		"stylua",
 
@@ -52,8 +51,9 @@ M.mason = {
 		"shellharden",
 
 		-- Others
-    "tailwindcss-language-server",
-    -- "vscode-css-language-server",
+		"tailwindcss-language-server",
+
+		-- "vscode-css-language-server",
 		"css-lsp",
 		"codespell",
 		"dockerfile-language-server",
@@ -61,29 +61,29 @@ M.mason = {
 		"editorconfig-checker",
 		"html-lsp",
 	},
-  automatic_installation = true,
+	automatic_installation = true,
 }
 
 vim.api.nvim_create_user_command("MasonInstallAll", function()
-  vim.cmd("MasonInstall " .. table.concat(M.mason.ensure_installed, " "))
+	vim.cmd("MasonInstall " .. table.concat(M.mason.ensure_installed, " "))
 end, {})
 
 M.treesitter = {
-  autotag = {
-    enable = true,
-  },
-  highight = {
-    enable = true,
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "<leader><tab>",
-      node_incremental = "<leader><tab>",
-      node_decremental = "<bs>",
-      scope_incremental = false
-    },
-  },
+	autotag = {
+		enable = true,
+	},
+	highight = {
+		enable = true,
+	},
+	incremental_selection = {
+		enable = true,
+		keymaps = {
+			init_selection = "<leader><tab>",
+			node_incremental = "<leader><tab>",
+			node_decremental = "<bs>",
+			scope_incremental = false,
+		},
+	},
 	ensure_installed = {
 		"bash",
 		"cmake",
@@ -116,8 +116,8 @@ M.treesitter = {
 		"todotxt",
 		"toml",
 		"typescript",
-    "svelte",
-    "tsx",
+		"svelte",
+		"tsx",
 		"vim",
 		"yaml",
 	},
@@ -126,7 +126,7 @@ M.treesitter = {
 M.nvimtree = {
 	git = {
 		enable = true,
-  ignore = false,
+		ignore = false,
 	},
 	renderer = {
 		highlight_git = true,

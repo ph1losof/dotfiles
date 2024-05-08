@@ -87,19 +87,6 @@ local plugins = {
 		},
 	},
 	{
-		"Exafunction/codeium.vim",
-		event = "BufEnter",
-	},
-	-- {
-	--   "sourcegraph/sg.nvim",
-	--   event = "VeryLazy",
-	--   opts = {},
-	--   keys = {
-	--     { "<leader>ss", "<cmd>lua require('sg.extensions.telescope').fuzzy_search_results()<CR>", desc = "Fuzzy Search" },
-	--   },
-	--   dependencies = { "nvim-lua/plenary.nvim" },
-	-- },
-	{
 		"metakirby5/codi.vim",
 		event = "VeryLazy",
 	},
@@ -220,99 +207,175 @@ local plugins = {
 	},
 	{
 		"mfussenegger/nvim-dap",
-		keys = {
-			{ "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", desc = "Toggle Breakpoint" },
-			{
-				"<leader>dB",
-				"<cmd>lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>",
-				desc = "Conditional Breakpoint",
-			},
-			{ "<leader>dc", "<cmd>lua require'dap'.continue()<cr>", desc = "Continue" },
-			{ "<leader>dj", "<cmd>lua require'dap'.step_into()<cr>", desc = "Step Into" },
-			{ "<leader>dl", "<cmd>lua require'dap'.step_over()<cr>", desc = "Step Over" },
-			{ "<leader>dk", "<cmd>lua require'dap'.step_out()<cr>", desc = "Step Out" },
-			{ "<leader>dh", "<cmd>lua require'dap'.step_back()<cr>", desc = "Step Back" },
-		},
-	},
-	-- {
-	--   "quick-lint/quick-lint-js",
-	--   dependencies = {
-	--     "neovim/nvim-lspconfig",
-	--   },
-	--   file_types = { "javascript", "javascriptreact", "typescript", "typescriptreact", 'javascript.jsx', 'typescript.tsx' },
-	--   config = function()
-	--     require("quick-lint-js").setup()
-	--   end,
-	-- },
-	{
-		"rcarriga/nvim-dap-ui",
-		config = function()
-			require("dapui").setup()
-			local dap, dapui = require("dap"), require("dapui")
-			dap.listeners.after.event_initialized["dapui_config"] = function()
-				dapui.open({})
-			end
-			dap.listeners.before.event_terminated["dapui_config"] = function()
-				dapui.close({})
-			end
-			dap.listeners.before.event_exited["dapui_config"] = function()
-				dapui.close({})
-			end
-		end,
-		keys = {
-			{ "<leader>du", "<cmd>lua require'dapui'.toggle()<cr>", desc = "Toggle UI" },
-		},
-		requires = { "mfussenegger/nvim-dap" },
-		dependencies = { "nvim-neotest/nvim-nio" },
-	},
-	{
-		"mxsdev/nvim-dap-vscode-js",
-		dependencies = { "mfussenegger/nvim-dap" },
-		config = function()
-			require("dap-vscode-js").setup({
-				debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
-				adapters = {
-					"pwa-node",
-					"pwa-chrome",
-					"pwa-msedge",
-					"node-terminal",
-					"pwa-extensionHost",
-					"node",
-					"chrome",
-				},
-			})
-			local js_based_languages = { "typescript", "javascript", "typescriptreact", "typescript.tsx" }
+		opts = function()
+			local dap = require("dap")
 
-			for _, language in ipairs(js_based_languages) do
-				require("dap").configurations[language] = {
-					{
-						type = "pwa-node",
-						request = "launch",
-						name = "Launch file",
-						program = "${file}",
-						cwd = "${workspaceFolder}",
-					},
-					{
-						type = "pwa-node",
-						request = "attach",
-						name = "Attach",
-						processId = require("dap.utils").pick_process,
-						cwd = "${workspaceFolder}",
-					},
-					{
-						type = "pwa-chrome",
-						request = "launch",
-						name = 'Start Chrome with "localhost"',
-						url = "http://localhost:3000",
-						webRoot = "${workspaceFolder}",
-						userDataDir = "${workspaceFolder}/.vscode/vscode-chrome-debug-userdatadir",
-					},
-				}
+			for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
+				if not dap.configurations[language] then
+					dap.configurations[language] = {
+						-- Debug single nodejs files
+						{
+							type = "pwa-node",
+							request = "launch",
+							name = "Launch file",
+							program = "${file}",
+							cwd = vim.fn.getcwd(),
+							sourceMaps = true,
+						},
+						-- Debug nodejs processes (make sure to add --inspect when you run the process)
+						{
+							type = "pwa-node",
+							request = "attach",
+							name = "Attach",
+							processId = require("dap.utils").pick_process,
+							program = "${file}",
+							cwd = vim.fn.getcwd(),
+							sourceMaps = true,
+						},
+						-- Debug web applications (client side)
+						{
+							type = "pwa-chrome",
+							request = "launch",
+							name = "Launch & Debug Chrome",
+							port = 9222,
+							url = function()
+								local co = coroutine.running()
+								return coroutine.create(function()
+									vim.ui.input({
+										prompt = "Enter URL: ",
+										default = "http://localhost:3000",
+									}, function(url)
+										if url == nil or url == "" then
+											return
+										else
+											coroutine.resume(co, url)
+										end
+									end)
+								end)
+							end,
+							webRoot = vim.fn.getcwd(),
+							protocol = "inspector",
+							sourceMaps = true,
+							userDataDir = false,
+						},
+						-- Divider for the launch.json derived configs
+						{
+							name = "----- ↓ launch.json configs ↓ -----",
+							type = "",
+							request = "launch",
+						},
+					}
+				end
 			end
 		end,
+		dependencies = {
+			{
+				"williamboman/mason.nvim",
+				opts = function(_, opts)
+					opts.ensure_installed = opts.ensure_installed or {}
+					table.insert(opts.ensure_installed, "js-debug-adapter")
+				end,
+			},
+			-- fancy UI for the debugger
+			{
+				"rcarriga/nvim-dap-ui",
+				dependencies = { "nvim-neotest/nvim-nio" },
+      -- stylua: ignore
+      keys = {
+        { "<leader>du", function() require("dapui").toggle({ }) end, desc = "Dap UI" },
+        { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = {"n", "v"} },
+      },
+				opts = {},
+				config = function(_, opts)
+					-- setup dap config by VsCode launch.json file
+					-- require("dap.ext.vscode").load_launchjs()
+					local dap = require("dap")
+					local dapui = require("dapui")
+					dapui.setup(opts)
+					dap.listeners.after.event_initialized["dapui_config"] = function()
+						dapui.open({})
+					end
+					dap.listeners.before.event_terminated["dapui_config"] = function()
+						dapui.close({})
+					end
+					dap.listeners.before.event_exited["dapui_config"] = function()
+						dapui.close({})
+					end
+				end,
+			},
+			-- Install the vscode-js-debug adapter
+			{
+				"microsoft/vscode-js-debug",
+				-- After install, build it and rename the dist directory to out
+				build = "npm install --legacy-peer-deps --no-save && npx gulp vsDebugServerBundle && rm -rf out && mv dist out",
+				version = "1.*",
+			},
+			{
+				"mxsdev/nvim-dap-vscode-js",
+				config = function()
+					---@diagnostic disable-next-line: missing-fields
+					require("dap-vscode-js").setup({
+						debugger_path = vim.fn.resolve(vim.fn.stdpath("data") .. "/lazy/vscode-js-debug"),
+
+						adapters = {
+							"chrome",
+							"pwa-node",
+							"pwa-chrome",
+							"pwa-msedge",
+							"pwa-extensionHost",
+							"node-terminal",
+						},
+					})
+				end,
+			},
+
+			-- virtual text for the debugger
+			{
+				"theHamsta/nvim-dap-virtual-text",
+				opts = {},
+			},
+		},
+
+  -- stylua: ignore
+  keys = {
+    { "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, desc = "Breakpoint Condition" },
+    { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint" },
+    { "<leader>dc", function() require("dap").continue() end, desc = "Continue" },
+    { "<leader>da", function() require("dap").continue({ before = get_args }) end, desc = "Run with Args" },
+    { "<leader>dC", function() require("dap").run_to_cursor() end, desc = "Run to Cursor" },
+    { "<leader>dg", function() require("dap").goto_() end, desc = "Go to Line (No Execute)" },
+    { "<leader>di", function() require("dap").step_into() end, desc = "Step Into" },
+    { "<leader>dj", function() require("dap").down() end, desc = "Down" },
+    { "<leader>dk", function() require("dap").up() end, desc = "Up" },
+    { "<leader>dl", function() require("dap").run_last() end, desc = "Run Last" },
+    { "<leader>do", function() require("dap").step_out() end, desc = "Step Out" },
+    { "<leader>dO", function() require("dap").step_over() end, desc = "Step Over" },
+    { "<leader>dp", function() require("dap").pause() end, desc = "Pause" },
+    { "<leader>dr", function() require("dap").repl.toggle() end, desc = "Toggle REPL" },
+    { "<leader>ds", function() require("dap").session() end, desc = "Session" },
+    { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
+    { "<leader>dw", function() require("dap.ui.widgets").hover() end, desc = "Widgets" },
+  },
 	},
 	{
 		"psliwka/vim-smoothie",
+		event = "BufEnter",
+	},
+	-- {
+	-- 	"zbirenbaum/copilot.lua",
+	-- 	cmd = "Copilot",
+	-- 	build = ":Copilot auth",
+	-- 	opts = {
+	-- 		suggestion = { enabled = false },
+	-- 		panel = { enabled = false },
+	-- 		filetypes = {
+	-- 			markdown = true,
+	-- 			help = true,
+	-- 		},
+	-- 	},
+	-- },
+	{
+		"Exafunction/codeium.vim",
 		event = "BufEnter",
 	},
 }
