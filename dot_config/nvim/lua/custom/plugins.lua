@@ -63,7 +63,6 @@ local plugins = {
     { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
     -- { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
   },
-
 	},
 	{
 		"ThePrimeagen/harpoon",
@@ -158,13 +157,14 @@ local plugins = {
 		"windwp/nvim-ts-autotag",
 		event = "InsertEnter",
 		opts = {},
-	},{
-    'windwp/nvim-autopairs',
-    event = "InsertEnter",
-    config = true
-    -- use opts = {} for passing setup options
-    -- this is equalent to setup({}) function
-},
+	},
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		config = true,
+		-- use opts = {} for passing setup options
+		-- this is equalent to setup({}) function
+	},
 	{
 		"pmizio/typescript-tools.nvim",
 		lazy = false,
@@ -263,6 +263,7 @@ local plugins = {
 			{ "<leader>du", "<cmd>lua require'dapui'.toggle()<cr>", desc = "Toggle UI" },
 		},
 		requires = { "mfussenegger/nvim-dap" },
+		dependencies = { "nvim-neotest/nvim-nio" },
 	},
 	{
 		"mxsdev/nvim-dap-vscode-js",
@@ -309,6 +310,10 @@ local plugins = {
 				}
 			end
 		end,
+	},
+	{
+		"psliwka/vim-smoothie",
+		event = "BufEnter",
 	},
 }
 
