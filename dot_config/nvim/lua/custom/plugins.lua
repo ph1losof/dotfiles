@@ -235,9 +235,9 @@ local plugins = {
 						-- Debug web applications (client side)
 						{
 							type = "pwa-chrome",
-							request = "launch",
-							name = "Launch & Debug Chrome",
+							request = "attach",
 							port = 9222,
+							name = "Launch & Debug Chrome",
 							url = function()
 								local co = coroutine.running()
 								return coroutine.create(function()
@@ -377,6 +377,25 @@ local plugins = {
 	{
 		"Exafunction/codeium.vim",
 		event = "BufEnter",
+	},
+	{
+		"kdheepak/lazygit.nvim",
+		cmd = {
+			"LazyGit",
+			"LazyGitConfig",
+			"LazyGitCurrentFile",
+			"LazyGitFilter",
+			"LazyGitFilterCurrentFile",
+		},
+		-- optional for floating window border decoration
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+		-- setting the keybinding for LazyGit with 'keys' is recommended in
+		-- order to load the plugin when the command is run for the first time
+		keys = {
+			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+		},
 	},
 }
 
