@@ -207,7 +207,7 @@ local plugins = {
 	},
 	{
 		"mfussenegger/nvim-dap",
-		opts = function()
+		config = function()
 			local dap = require("dap")
 
 			for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
