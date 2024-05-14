@@ -237,22 +237,7 @@ local plugins = {
 							type = "pwa-chrome",
 							request = "attach",
 							port = 9222,
-							name = "Launch & Debug Chrome",
-							url = function()
-								local co = coroutine.running()
-								return coroutine.create(function()
-									vim.ui.input({
-										prompt = "Enter URL: ",
-										default = "http://localhost:3000",
-									}, function(url)
-										if url == nil or url == "" then
-											return
-										else
-											coroutine.resume(co, url)
-										end
-									end)
-								end)
-							end,
+							name = "Attach to Chrome(9222)",
 							webRoot = vim.fn.getcwd(),
 							protocol = "inspector",
 							sourceMaps = true,
@@ -361,19 +346,6 @@ local plugins = {
 		"psliwka/vim-smoothie",
 		event = "BufEnter",
 	},
-	-- {
-	-- 	"zbirenbaum/copilot.lua",
-	-- 	cmd = "Copilot",
-	-- 	build = ":Copilot auth",
-	-- 	opts = {
-	-- 		suggestion = { enabled = false },
-	-- 		panel = { enabled = false },
-	-- 		filetypes = {
-	-- 			markdown = true,
-	-- 			help = true,
-	-- 		},
-	-- 	},
-	-- },
 	{
 		"Exafunction/codeium.vim",
 		event = "BufEnter",
