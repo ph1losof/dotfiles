@@ -124,6 +124,9 @@ M.treesitter = {
 }
 
 M.nvimtree = {
+	view = {
+		side = "right",
+	},
 	git = {
 		enable = true,
 		ignore = false,
