@@ -65,20 +65,6 @@ local plugins = {
   },
 	},
 	{
-		"ThePrimeagen/harpoon",
-		lazy = false,
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
-		config = true,
-		keys = {
-			{ "<leader>mh", "<cmd>lua require('harpoon.mark').add_file()<cr>", desc = "Mark file with harpoon" },
-			{ "<leader>nh", "<cmd>lua require('harpoon.ui').nav_next()<cr>", desc = "Go to next harpoon mark" },
-			{ "<leader>ph", "<cmd>lua require('harpoon.ui').nav_prev()<cr>", desc = "Go to previous harpoon mark" },
-			{ "<leader>ah", "<cmd>lua require('harpoon.ui').toggle_quick_menu()<cr>", desc = "Show harpoon marks" },
-		},
-	},
-	{
 		"nvim-neotest/neotest",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -368,6 +354,25 @@ local plugins = {
 		keys = {
 			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
 		},
+	},
+	{
+		"stevearc/oil.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		keys = {
+			{ "<leader>-", "<cmd>Oil<cr>", desc = "Open parent directory" },
+		},
+		config = function()
+			require("oil").setup({
+				columns = { "icon" },
+				keymaps = {
+					["<C-h>"] = false,
+					["<M-h>"] = "actions.select_split",
+				},
+				view_options = {
+					show_hidden = true,
+				},
+			})
+		end,
 	},
 }
 
