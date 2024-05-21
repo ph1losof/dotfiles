@@ -106,9 +106,11 @@ local plugins = {
 		"nvimdev/lspsaga.nvim",
 		keys = {
 			{ "K", "<cmd>Lspsaga hover_doc<CR>", desc = "Hover Doc" },
-			{ "<leader>rf", "<cmd>Lspsaga finder<CR>", desc = "LSP Finder" },
-			{ "<leader>ra", "<cmd>Lspsaga rename<CR>", desc = "Rename" },
+			{ "<leader>gf", "<cmd>Lspsaga finder<CR>", desc = "LSP Finder" },
+			{ "<leader>gr", "<cmd>Lspsaga rename<CR>", desc = "Rename" },
 			{ "<leader>t", "<cmd>Lspsaga term_toggle<CR>", desc = "Terminal" },
+			{ "<leader>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
+			{ "<leader>gpt", "<cmd>Lspsaga peek_type_definition<CR>", desc = "Preview Type Definition" },
 		},
 		config = function()
 			require("lspsaga").setup({})
@@ -129,7 +131,7 @@ local plugins = {
 	{
 		"windwp/nvim-ts-autotag",
 		event = "InsertEnter",
-		opts = {},
+		-- opts = {},
 	},
 	{
 		"windwp/nvim-autopairs",
@@ -374,6 +376,26 @@ local plugins = {
 	-- 		})
 	-- 	end,
 	-- },
+	{
+		"ThePrimeagen/refactoring.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+		config = function()
+			require("refactoring").setup()
+			require("telescope").load_extension("refactoring")
+		end,
+		keys = {
+			{
+				"<leader>rr",
+				function()
+					require("telescope").extensions.refactoring.refactors()
+				end,
+				desc = "Refactor",
+			},
+		},
+	},
 }
 
 return plugins
