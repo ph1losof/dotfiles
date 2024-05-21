@@ -60,6 +60,7 @@ M.mason = {
 		"dot-language-server",
 		"editorconfig-checker",
 		"html-lsp",
+		"emmet-language-server",
 	},
 	automatic_installation = true,
 }

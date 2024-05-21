@@ -36,7 +36,7 @@ vim.opt.undofile = true
 
 vim.opt.formatoptions:append({ "r" })
 
-vim.opt.clipboard:append({ "unnamedplus" })
+-- vim.opt.clipboard:append({ "unnamed" })
 
 vim.opt.colorcolumn = "80"
 
