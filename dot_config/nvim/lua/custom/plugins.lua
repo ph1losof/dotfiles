@@ -7,8 +7,8 @@ local plugins = {
 	},
 	{
 		"ThePrimeagen/harpoon",
+		branch = "master",
 		lazy = false,
-		branch = "harpoon2",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
