@@ -404,6 +404,16 @@ local plugins = {
 			},
 		},
 	},
+	{
+		"kevinhwang91/nvim-bqf",
+		event = "VeryLazy",
+		dependencies = {
+			"junegunn/fzf",
+		},
+		config = function()
+			require("bqf").setup()
+		end,
+	},
 }
 
 return plugins
