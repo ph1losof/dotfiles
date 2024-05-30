@@ -76,3 +76,4 @@ rcmd - a : open -a Arc
 rcmd - t : open -a /Applications/Alacritty.app
 rcmd - f : open -a Finder
 rcmd - n : open -a /Applications/Notion.app
+rcmd - c : open -a /Applications/Notion Calendar.app
