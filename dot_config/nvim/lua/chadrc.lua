@@ -5,7 +5,7 @@
 local M = {}
 
 M.ui = {
-  theme = "yoru",
+  theme = "rxyhn",
   tabufline = {
     enabled = true,
     order = { "buffers", "tabs" },
