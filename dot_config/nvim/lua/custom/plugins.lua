@@ -9,9 +9,7 @@ local plugins = {
 		"ThePrimeagen/harpoon",
 		branch = "master",
 		lazy = false,
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
+		dependencies = { "nvim-lua/plenary.nvim" },
 		config = true,
 		keys = {
 			{ "<leader>hx", "<cmd>lua require('harpoon.mark').add_file()<cr>", desc = "Mark file with harpoon" },
@@ -78,8 +76,8 @@ local plugins = {
   keys = {
     { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
     { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-    { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-    { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+    -- { "S", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+    -- { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
     -- { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
   },
 	},
@@ -115,11 +113,6 @@ local plugins = {
 				},
 			})
 		end,
-	},
-	{
-		"numToStr/Comment.nvim",
-		opts = {},
-		lazy = false,
 	},
 	{
 		"nvimdev/lspsaga.nvim",
@@ -378,7 +371,7 @@ local plugins = {
 	},
 	{
 		"nvim-pack/nvim-spectre",
-		opts = {},
+		opts = { open_cmd = "noswapfile vnew" },
 		keys = {
 			{ "<leader>fr", "<cmd>lua require('spectre').open()<cr>", desc = "Open Spectre" },
 		},
@@ -413,6 +406,9 @@ local plugins = {
 		config = function()
 			require("bqf").setup()
 		end,
+		keys = {
+			{ "<leader>qf", "<cmd>lua require('bqf').open()<cr>", desc = "Quickfix" },
+		},
 	},
 }
 
