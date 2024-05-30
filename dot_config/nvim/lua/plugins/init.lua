@@ -85,8 +85,26 @@ return {
     end,
   },
   {
-    "Exafunction/codeium.vim",
-    event = "BufEnter",
+    "supermaven-inc/supermaven-nvim",
+    event = "VeryLazy",
+    config = function()
+      require("supermaven-nvim").setup {
+        disable_inline_completion = false,
+      }
+    end,
+  },
+  {
+    "hrsh7th/nvim-cmp",
+    opts = {
+      sources = {
+        { name = "nvim_lsp" },
+        { name = "supermaven" },
+        { name = "luasnip" },
+        { name = "buffer" },
+        { name = "nvim_lua" },
+        { name = "path" },
+      },
+    },
   },
   {
     "neovim/nvim-lspconfig",
@@ -128,10 +146,6 @@ return {
   },
   {
     "psliwka/vim-smoothie",
-    event = "BufEnter",
-  },
-  {
-    "Exafunction/codeium.vim",
     event = "BufEnter",
   },
   {
