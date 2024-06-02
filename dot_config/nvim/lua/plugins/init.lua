@@ -11,6 +11,10 @@ return {
     },
   },
   {
+    "stevearc/dressing.nvim",
+    opts = {},
+  },
+  {
     "stevearc/conform.nvim",
     event = "BufWritePost", -- uncomment for format on save
     config = function()

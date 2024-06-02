@@ -32,16 +32,16 @@ vim.opt.ai = true
 vim.opt.si = true
 vim.opt.wrap = false
 vim.opt.backspace = "start,eol,indent"
-vim.opt.path:append({ "**" })
-vim.opt.wildignore:append({ "*/node_modules/*,*/.history/*" })
+vim.opt.path:append { "**" }
+vim.opt.wildignore:append { "*/node_modules/*,*/.history/*" }
 
 vim.opt.relativenumber = true
 
 vim.opt.undofile = true
 
-vim.opt.formatoptions:append({ "r" })
+vim.opt.formatoptions:append { "r" }
 
--- vim.opt.clipboard:append({ "unnamed" })
+vim.opt.clipboard:append { "unnamedplus" }
 
 vim.opt.colorcolumn = "80"
 

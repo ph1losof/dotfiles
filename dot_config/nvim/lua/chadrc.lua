@@ -5,7 +5,7 @@
 local M = {}
 
 M.ui = {
-  theme = "rxyhn",
+  theme = "catppuccin",
   tabufline = {
     enabled = true,
     order = { "buffers", "tabs" },
