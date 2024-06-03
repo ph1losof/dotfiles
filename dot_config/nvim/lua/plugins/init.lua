@@ -27,20 +27,75 @@ return {
   },
   {
     "ThePrimeagen/harpoon",
-    branch = "master",
-    lazy = false,
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = true,
-    keys = {
-      { "<leader>hx", "<cmd>lua require('harpoon.mark').add_file()<cr>", desc = "Mark file with harpoon" },
-      { "<leader>hn", "<cmd>lua require('harpoon.ui').nav_next()<cr>", desc = "Go to next harpoon mark" },
-      { "<leader>hp", "<cmd>lua require('harpoon.ui').nav_prev()<cr>", desc = "Go to previous harpoon mark" },
-      { "<leader>hm", "<cmd>lua require('harpoon.ui').toggle_quick_menu()<cr>", desc = "Show harpoon marks" },
-      { "<leader>h1", '<cmd>lua require("harpoon.ui").nav_file(1)<cr>', desc = "Go to harpoon mark 1" },
-      { "<leader>h2", '<cmd>lua require("harpoon.ui").nav_file(2)<cr>', desc = "Go to harpoon mark 2" },
-      { "<leader>h3", '<cmd>lua require("harpoon.ui").nav_file(3)<cr>', desc = "Go to harpoon mark 3" },
-      { "<leader>h4", '<cmd>lua require("harpoon.ui").nav_file(4)<cr>', desc = "Go to harpoon mark 4" },
+    enabled = true,
+    branch = "harpoon2",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
     },
+    keys = function()
+      local harpoon = require "harpoon"
+      return {
+        {
+          "<leader>h1",
+          function()
+            harpoon:list():select(1)
+          end,
+          desc = "Go to harpoon mark 1",
+        },
+        {
+          "<leader>h2",
+          function()
+            harpoon:list():select(2)
+          end,
+          desc = "Go to harpoon mark 2",
+        },
+        {
+          "<leader>h3",
+          function()
+            harpoon:list():select(3)
+          end,
+          desc = "Go to harpoon mark 3",
+        },
+        {
+          "<leader>h4",
+          function()
+            harpoon:list():select(4)
+          end,
+          desc = "Go to harpoon mark 4",
+        },
+        {
+          "<leader>hn",
+          function()
+            harpoon:list():next()
+          end,
+          desc = "Go to next harpoon mark",
+        },
+        {
+          "<leader>hp",
+          function()
+            harpoon:list():prev()
+          end,
+          desc = "Go to previous harpoon mark",
+        },
+        {
+          "<leader>hm",
+          function()
+            harpoon.ui:toggle_quick_menu(harpoon:list())
+          end,
+          desc = "Show harpoon marks",
+        },
+        {
+          "<leader>hx",
+          function()
+            harpoon:list():add()
+          end,
+          desc = "Mark file with harpoon",
+        },
+      }
+    end,
+    config = function(_, opts)
+      require("harpoon").setup(opts)
+    end,
   },
   {
     "nvim-neotest/neotest",
@@ -259,6 +314,11 @@ return {
           dim = 0.18, -- dim the color of `message`
           cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
         },
+        condition = function(buf)
+          if vim.bo[buf].filetype == "harpoon" then
+            return false
+          end
+        end,
         trigger_events = { "FocusLost", "BufLeave" },
         debounce_delay = 2000,
         callbacks = {
