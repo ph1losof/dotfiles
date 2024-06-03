@@ -314,11 +314,27 @@ return {
           dim = 0.18, -- dim the color of `message`
           cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
         },
+
         condition = function(buf)
-          if vim.bo[buf].filetype == "harpoon" then
+          if pcall(function()
+            return vim.bo[buf].buftype
+          end) then
+            if vim.bo[buf].buftype ~= "" then
+              return false
+            end
+          else
             return false
           end
         end,
+        -- condition = function(buf)
+        -- print(vim.bo[buf].filetype)
+        -- if vim.bo[buf].filetype == "sagafinder" then
+        --   return false
+        -- end
+        -- if vim.bo[buf].filetype == "harpoon" then
+        --   return false
+        -- end
+        -- end,
         trigger_events = { "FocusLost", "BufLeave" },
         debounce_delay = 2000,
         callbacks = {
