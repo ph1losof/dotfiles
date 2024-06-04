@@ -26,78 +26,6 @@ return {
     event = "VeryLazy",
   },
   {
-    "ThePrimeagen/harpoon",
-    enabled = true,
-    branch = "harpoon2",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
-    keys = function()
-      local harpoon = require "harpoon"
-      return {
-        {
-          "<leader>h1",
-          function()
-            harpoon:list():select(1)
-          end,
-          desc = "Go to harpoon mark 1",
-        },
-        {
-          "<leader>h2",
-          function()
-            harpoon:list():select(2)
-          end,
-          desc = "Go to harpoon mark 2",
-        },
-        {
-          "<leader>h3",
-          function()
-            harpoon:list():select(3)
-          end,
-          desc = "Go to harpoon mark 3",
-        },
-        {
-          "<leader>h4",
-          function()
-            harpoon:list():select(4)
-          end,
-          desc = "Go to harpoon mark 4",
-        },
-        {
-          "<leader>hn",
-          function()
-            harpoon:list():next()
-          end,
-          desc = "Go to next harpoon mark",
-        },
-        {
-          "<leader>hp",
-          function()
-            harpoon:list():prev()
-          end,
-          desc = "Go to previous harpoon mark",
-        },
-        {
-          "<leader>hm",
-          function()
-            harpoon.ui:toggle_quick_menu(harpoon:list())
-          end,
-          desc = "Show harpoon marks",
-        },
-        {
-          "<leader>hx",
-          function()
-            harpoon:list():add()
-          end,
-          desc = "Mark file with harpoon",
-        },
-      }
-    end,
-    config = function(_, opts)
-      require("harpoon").setup(opts)
-    end,
-  },
-  {
     "nvim-neotest/neotest",
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -255,6 +183,133 @@ return {
     },
   },
   {
+    "ThePrimeagen/harpoon",
+    enabled = true,
+    branch = "harpoon2",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    keys = function()
+      local harpoon = require "harpoon"
+      return {
+        {
+          "<leader>h1",
+          function()
+            harpoon:list():select(1)
+          end,
+          desc = "Go to harpoon mark 1",
+        },
+        {
+          "<leader>h2",
+          function()
+            harpoon:list():select(2)
+          end,
+          desc = "Go to harpoon mark 2",
+        },
+        {
+          "<leader>h3",
+          function()
+            harpoon:list():select(3)
+          end,
+          desc = "Go to harpoon mark 3",
+        },
+        {
+          "<leader>h4",
+          function()
+            harpoon:list():select(4)
+          end,
+          desc = "Go to harpoon mark 4",
+        },
+        {
+          "<leader>hn",
+          function()
+            harpoon:list():next()
+          end,
+          desc = "Go to next harpoon mark",
+        },
+        {
+          "<leader>hp",
+          function()
+            harpoon:list():prev()
+          end,
+          desc = "Go to previous harpoon mark",
+        },
+        {
+          "<leader>hm",
+          function()
+            harpoon.ui:toggle_quick_menu(harpoon:list())
+          end,
+          desc = "Show harpoon marks",
+        },
+        {
+          "<leader>hx",
+          function()
+            harpoon:list():add()
+          end,
+          desc = "Mark file with harpoon",
+        },
+      }
+    end,
+    config = function(_, opts)
+      require("harpoon").setup(opts)
+    end,
+  },
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = {
+      "kevinhwang91/promise-async",
+    },
+    event = "BufRead",
+    keys = {
+      {
+        "zR",
+        function()
+          require("ufo").openAllFolds()
+        end,
+        desc = "Open all folds",
+      },
+      {
+        "zM",
+        function()
+          require("ufo").closeAllFolds()
+        end,
+        desc = "Close all folds",
+      },
+      {
+        "zZ",
+        function()
+          require("ufo").peekFoldedLinesUnderCursor()
+        end,
+        desc = "Peek folded lines under cursor",
+      },
+    },
+    opts = {
+      open_fold_hl_timeout = 0,
+      fold_virt_text_handler = function(text, lnum, endLnum, width)
+        local suffix = "  "
+        local lines = ("[%d lines] "):format(endLnum - lnum)
+
+        local cur_width = 0
+        for _, section in ipairs(text) do
+          cur_width = cur_width + vim.fn.strdisplaywidth(section[1])
+        end
+
+        suffix = suffix .. (" "):rep(width - cur_width - vim.fn.strdisplaywidth(lines) - 3)
+
+        table.insert(text, { suffix, "Comment" })
+        table.insert(text, { lines, "Todo" })
+        return text
+      end,
+      preview = {
+        win_config = {
+          border = { "┏", "━", "┓", "┃", "┛", "━", "┗", "┃" },
+          winblend = 0,
+          winhighlight = "Normal:LazyNormal",
+        },
+      },
+    },
+  },
+  {
     "kevinhwang91/nvim-bqf",
     event = "VeryLazy",
     dependencies = {
@@ -270,12 +325,13 @@ return {
   {
     "windwp/nvim-ts-autotag",
     event = "InsertEnter",
-    -- opts = {},
+    opts = {},
   },
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     config = true,
+    opts = {},
     -- use opts = {} for passing setup options
     -- this is equalent to setup({}) function
   },
@@ -303,7 +359,7 @@ return {
   },
   {
     "Pocco81/auto-save.nvim",
-    event = "BufEnter",
+    event = "BufWritePost",
     config = function()
       require("auto-save").setup {
         enabled = true,
@@ -326,15 +382,6 @@ return {
             return false
           end
         end,
-        -- condition = function(buf)
-        -- print(vim.bo[buf].filetype)
-        -- if vim.bo[buf].filetype == "sagafinder" then
-        --   return false
-        -- end
-        -- if vim.bo[buf].filetype == "harpoon" then
-        --   return false
-        -- end
-        -- end,
         trigger_events = { "FocusLost", "BufLeave" },
         debounce_delay = 2000,
         callbacks = {
@@ -360,5 +407,10 @@ return {
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons",
     },
+  },
+  {
+    "m4xshen/hardtime.nvim",
+    dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
+    opts = {},
   },
 }
