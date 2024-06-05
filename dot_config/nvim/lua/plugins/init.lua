@@ -15,6 +15,15 @@ return {
     opts = {},
   },
   {
+    "chentoast/marks.nvim",
+    event = "VeryLazy",
+    opts = {
+      mappings = {
+        preview = "m;",
+      },
+    },
+  },
+  {
     "stevearc/conform.nvim",
     event = "BufWritePost", -- uncomment for format on save
     config = function()
@@ -50,18 +59,40 @@ return {
   },
   {
     "folke/trouble.nvim",
-    event = "BufRead",
-    lazy = false,
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = "Trouble",
     keys = {
-      { "<leader>xx", "<cmd>TroubleToggle<cr>", desc = "Trouble Toggle" },
-      { "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics" },
-      { "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics" },
-      { "<leader>xq", "<cmd>TroubleToggle quickfix<cr>", desc = "Quickfix" },
-      { "<leader>xl", "<cmd>TroubleToggle loclist<cr>", desc = "Location List" },
-      { "<leader>xr", "<cmd>TroubleToggle lsp_references<cr>", desc = "LSP References" },
+      {
+        "<leader>xx",
+        "<cmd>Trouble diagnostics toggle<cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+      {
+        "<leader>xX",
+        "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+        desc = "Buffer Diagnostics (Trouble)",
+      },
+      {
+        "<leader>cs",
+        "<cmd>Trouble symbols toggle focus=false<cr>",
+        desc = "Symbols (Trouble)",
+      },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / references / ... (Trouble)",
+      },
+      {
+        "<leader>xL",
+        "<cmd>Trouble loclist toggle<cr>",
+        desc = "Location List (Trouble)",
+      },
+      {
+        "<leader>xQ",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
     },
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {},
   },
   {
     "kylechui/nvim-surround",
@@ -286,7 +317,7 @@ return {
     opts = {
       open_fold_hl_timeout = 0,
       fold_virt_text_handler = function(text, lnum, endLnum, width)
-        local suffix = "  "
+        local suffix = " > "
         local lines = ("[%d lines] "):format(endLnum - lnum)
 
         local cur_width = 0
@@ -325,7 +356,7 @@ return {
   {
     "windwp/nvim-ts-autotag",
     event = "InsertEnter",
-    opts = {},
+    -- opts = {},
   },
   {
     "windwp/nvim-autopairs",
@@ -407,10 +438,5 @@ return {
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons",
     },
-  },
-  {
-    "m4xshen/hardtime.nvim",
-    dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
-    opts = {},
   },
 }
