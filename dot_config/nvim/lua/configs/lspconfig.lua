@@ -24,6 +24,14 @@ lspconfig.rust_analyzer.setup {
   root_dir = util.root_pattern "Config.toml",
 }
 
+lspconfig.gleam.setup {
+  cmd = { "gleam", "lsp" },
+  filetypes = { "gleam" },
+  root_dir = lspconfig.util.root_pattern("gleam.toml", ".git"),
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
+
 lspconfig.emmet_language_server.setup {
   filetypes = {
     "astro",
