@@ -117,6 +117,7 @@ return {
       sources = {
         { name = "nvim_lsp" },
         { name = "supermaven" },
+        { name = 'cmdline' },
         { name = "luasnip" },
         { name = "buffer" },
         { name = "nvim_lua" },
