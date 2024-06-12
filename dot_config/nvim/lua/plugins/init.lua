@@ -435,6 +435,7 @@ return {
         end,
       }
     end,
+    debounce_delay = 250,
   },
   {
     "nvimdev/lspsaga.nvim",
