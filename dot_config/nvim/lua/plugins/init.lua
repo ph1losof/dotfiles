@@ -25,7 +25,7 @@ return {
   },
   {
     "stevearc/conform.nvim",
-    event = "BufWritePost", -- uncomment for format on save
+    event = "BufWritePre", -- uncomment for format on save
     config = function()
       require "configs.conform"
     end,
@@ -410,20 +410,14 @@ return {
     end,
   },
   {
-    "Pocco81/auto-save.nvim",
-    event = "BufWritePost",
+    "okuuva/auto-save.nvim",
+    cmd = "ASToggle", -- optional for lazy loading on command
+    event = { "InsertLeave", "TextChanged" }, -- optional for lazy loading on trigger events
     config = function()
       require("auto-save").setup {
-        enabled = true,
-        execution_message = {
-          message = function() -- message to print on save
-            return ("AutoSave: saved at " .. vim.fn.strftime "%H:%M:%S")
-          end,
-          dim = 0.18, -- dim the color of `message`
-          cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
-        },
-
         condition = function(buf)
+          local fn = vim.fn
+          local utils = require "auto-save.utils.data"
           if pcall(function()
             return vim.bo[buf].buftype
           end) then
@@ -433,13 +427,12 @@ return {
           else
             return false
           end
-          return true
+
+          if fn.getbufvar(buf, "&modifiable") == 1 and utils.not_in(fn.getbufvar(buf, "&filetype"), {}) then
+            return true -- met condition(s), can save
+          end
+          return false -- can't save
         end,
-        trigger_events = { "FocusLost", "BufLeave" },
-        debounce_delay = 2000,
-        callbacks = {
-          before_saving = nil,
-        },
       }
     end,
   },
