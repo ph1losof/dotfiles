@@ -7,8 +7,15 @@ local M = {}
 M.ui = {
   theme = "catppuccin",
   tabufline = {
-    enabled = true,
-    order = { "buffers", "tabs" },
+    enabled = false,
+  },
+  statusline = {
+    order = { "mode", "file", "harpoon", "diagnostics", "git", "%=", "lsp_msg", "%=", "lsp", "cursor", "cwd" },
+    modules = {
+      harpoon = function()
+        return "%#St_lspHints# " .. require("harpoonline").format() .. ""
+      end,
+    },
   },
   nvdash = {
     load_on_startup = true,

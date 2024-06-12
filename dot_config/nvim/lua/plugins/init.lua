@@ -274,17 +274,37 @@ return {
           desc = "Show harpoon marks",
         },
         {
-          "<leader>hx",
+          "<leader>ha",
           function()
             harpoon:list():add()
           end,
-          desc = "Mark file with harpoon",
+          desc = "Add buffer to harpoon",
+        },
+        {
+          "<leader>hd",
+          function()
+            harpoon:list():remove()
+          end,
+          desc = "Add buffer to harpoon",
         },
       }
     end,
     config = function(_, opts)
       require("harpoon").setup(opts)
     end,
+  },
+  {
+    "nvchad/ui",
+    dependencies = {
+      "abeldekat/harpoonline",
+      config = function()
+        require("harpoonline").setup {
+          on_update = function()
+            vim.cmd.redrawstatus()
+          end,
+        }
+      end,
+    },
   },
   {
     "kevinhwang91/nvim-ufo",
@@ -442,5 +462,10 @@ return {
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons",
     },
+  },
+  {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {},
   },
 }
