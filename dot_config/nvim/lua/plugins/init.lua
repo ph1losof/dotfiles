@@ -117,7 +117,7 @@ return {
       sources = {
         { name = "nvim_lsp" },
         { name = "supermaven" },
-        { name = 'cmdline' },
+        { name = "cmdline" },
         { name = "luasnip" },
         { name = "buffer" },
         { name = "nvim_lua" },
@@ -413,6 +413,7 @@ return {
           else
             return false
           end
+          return true
         end,
         trigger_events = { "FocusLost", "BufLeave" },
         debounce_delay = 2000,
@@ -424,6 +425,7 @@ return {
   },
   {
     "nvimdev/lspsaga.nvim",
+    event = "LspAttach",
     keys = {
       { "K", "<cmd>Lspsaga hover_doc<CR>", desc = "Hover Doc" },
       { "<leader>gf", "<cmd>Lspsaga finder<CR>", desc = "LSP Finder" },
@@ -431,6 +433,7 @@ return {
       { "<leader>t", "<cmd>Lspsaga term_toggle<CR>", desc = "Terminal" },
       { "<leader>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
       { "<leader>gpt", "<cmd>Lspsaga peek_type_definition<CR>", desc = "Preview Type Definition" },
+      { "<leader>ol", "<cmd>Lspsaga outline<CR>", desc = "Outline" },
     },
     config = function()
       require("lspsaga").setup {}
