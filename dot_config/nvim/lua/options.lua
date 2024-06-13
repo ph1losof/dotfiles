@@ -9,6 +9,7 @@ vim.opt.so = 11
 vim.opt.title = true
 vim.opt.autoindent = true
 vim.opt.hlsearch = true
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.opt.incsearch = true
 vim.opt.laststatus = 2
 vim.cmdheight = 1

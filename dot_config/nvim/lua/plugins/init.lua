@@ -1,5 +1,18 @@
 return {
   {
+    "danymat/neogen",
+    keys = {
+      {
+        "<leader>cc",
+        function()
+          require("neogen").generate {}
+        end,
+        desc = "Neogen Comment",
+      },
+    },
+    opts = { snippet_engine = "luasnip" },
+  },
+  {
     "folke/flash.nvim",
     event = "VeryLazy",
     ---@type Flash.Config
@@ -187,7 +200,7 @@ return {
     "nvim-pack/nvim-spectre",
     opts = { open_cmd = "noswapfile vnew" },
     keys = {
-      { "<leader>fr", "<cmd>lua require('spectre').open()<cr>", desc = "Open Spectre" },
+      { "<leader>sr", "<cmd>lua require('spectre').open()<cr>", desc = "Open Spectre" },
     },
     dependencies = { "nvim-lua/plenary.nvim" },
   },
@@ -453,7 +466,19 @@ return {
   },
   {
     "folke/todo-comments.nvim",
+    event = "VimEnter",
     dependencies = { "nvim-lua/plenary.nvim" },
-    opts = {},
+    opts = { signs = false },
+  },
+  {
+    "nvim-telescope/telescope.nvim",
+    keys = {
+      { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
+      { "<leader>fsd", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document symbols" },
+      { "<leader>fsw", "<cmd>Telescope lsp_workspace_symbols<cr>", desc = "Workspace symbols" },
+      { "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "Diagnostics" },
+      { "<leader>fq", "<cmd>Telescope quickfix<cr>", desc = "Quickfix" },
+      { "<leader>fa", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
+    },
   },
 }
