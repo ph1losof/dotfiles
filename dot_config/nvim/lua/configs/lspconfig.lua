@@ -6,7 +6,7 @@ local capabilities = require("nvchad.configs.lspconfig").capabilities
 local lspconfig = require "lspconfig"
 local util = require "lspconfig/util"
 
-local servers = { "html", "cssls", "lua_ls", "eslint", "tailwindcss" }
+local servers = { "html", "cssls", "eslint", "tailwindcss" }
 
 -- lsps with default config
 for _, lsp in ipairs(servers) do
@@ -16,6 +16,19 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
+
+lspconfig.lua_ls.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  on_init = on_init,
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" },
+      },
+    },
+  },
+}
 
 lspconfig.rust_analyzer.setup {
   on_attach = on_attach,

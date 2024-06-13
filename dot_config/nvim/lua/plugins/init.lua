@@ -10,6 +10,7 @@ return {
      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
     },
   },
+  { "tpope/vim-sleuth", opts = {} },
   {
     "stevearc/dressing.nvim",
     opts = {},
@@ -107,7 +108,7 @@ return {
     event = "VeryLazy",
     config = function()
       require("supermaven-nvim").setup {
-        disable_inline_completion = false,
+        disable_inline_completion = true,
       }
     end,
   },
@@ -162,10 +163,6 @@ return {
     "nvim-treesitter/nvim-treesitter",
     opts = require "plugins.overrides.treesitter",
     event = { "BufReadPre", "BufNewFile" },
-  },
-  {
-    "psliwka/vim-smoothie",
-    event = "BufEnter",
   },
   {
     "kdheepak/lazygit.nvim",
@@ -377,15 +374,12 @@ return {
   {
     "windwp/nvim-ts-autotag",
     event = "InsertEnter",
-    -- opts = {},
   },
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     config = true,
     opts = {},
-    -- use opts = {} for passing setup options
-    -- this is equalent to setup({}) function
   },
   {
     "pmizio/typescript-tools.nvim",

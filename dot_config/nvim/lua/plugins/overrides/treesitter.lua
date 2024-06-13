@@ -44,7 +44,6 @@ M = {
     "rust",
     "sql",
     "comment",
-    "svelte",
     "sxhkdrc",
     "todotxt",
     "toml",
@@ -52,6 +51,7 @@ M = {
     "svelte",
     "tsx",
     "vim",
+    'vimdoc',
     "yaml",
   },
 }

@@ -1,6 +1,7 @@
 local M = {}
 
 M = {
+      PATH = "prepend", -- "skip" seems to cause the spawning error
 	ensure_installed = {
 		-- Lua
 		"lua-language-server",
