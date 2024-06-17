@@ -1,9 +1,6 @@
 local M = {}
 
 M = {
-  autotag = {
-    enable = true,
-  },
   highight = {
     enable = true,
   },
@@ -51,7 +48,7 @@ M = {
     "svelte",
     "tsx",
     "vim",
-    'vimdoc',
+    "vimdoc",
     "yaml",
   },
 }

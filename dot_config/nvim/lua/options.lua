@@ -4,7 +4,7 @@ vim.scriptencoding = "utf-8"
 vim.opt.encoding = "utf-8"
 vim.opt.fileencoding = "utf-8"
 vim.wo.number = true
-vim.opt.so = 11
+vim.opt.so = 10
 
 vim.opt.title = true
 vim.opt.autoindent = true

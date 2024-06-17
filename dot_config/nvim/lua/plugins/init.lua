@@ -13,6 +13,10 @@ return {
     opts = { snippet_engine = "luasnip" },
   },
   {
+    "nvim-tree/nvim-tree.lua",
+    opts = require "plugins.overrides.nvimtree",
+  },
+  {
     "folke/flash.nvim",
     event = "VeryLazy",
     ---@type Flash.Config
@@ -77,34 +81,14 @@ return {
     cmd = "Trouble",
     keys = {
       {
-        "<leader>xx",
+        "<leader>tg",
         "<cmd>Trouble diagnostics toggle<cr>",
         desc = "Diagnostics (Trouble)",
       },
       {
-        "<leader>xX",
+        "<leader>tt",
         "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
         desc = "Buffer Diagnostics (Trouble)",
-      },
-      {
-        "<leader>cs",
-        "<cmd>Trouble symbols toggle focus=false<cr>",
-        desc = "Symbols (Trouble)",
-      },
-      {
-        "<leader>cl",
-        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
-        desc = "LSP Definitions / references / ... (Trouble)",
-      },
-      {
-        "<leader>xL",
-        "<cmd>Trouble loclist toggle<cr>",
-        desc = "Location List (Trouble)",
-      },
-      {
-        "<leader>xQ",
-        "<cmd>Trouble qflist toggle<cr>",
-        desc = "Quickfix List (Trouble)",
       },
     },
   },
@@ -169,10 +153,6 @@ return {
     opts = require "plugins.overrides.mason",
   },
   {
-    "nvim-tree/nvim-tree.lua",
-    opts = require "plugins.overrides.nvimtree",
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
     opts = require "plugins.overrides.treesitter",
     event = { "BufReadPre", "BufNewFile" },
@@ -196,34 +176,14 @@ return {
       { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
     },
   },
-  {
-    "nvim-pack/nvim-spectre",
-    opts = { open_cmd = "noswapfile vnew" },
-    keys = {
-      { "<leader>sr", "<cmd>lua require('spectre').open()<cr>", desc = "Open Spectre" },
-    },
-    dependencies = { "nvim-lua/plenary.nvim" },
-  },
-  {
-    "ThePrimeagen/refactoring.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    config = function()
-      require("refactoring").setup()
-      require("telescope").load_extension "refactoring"
-    end,
-    keys = {
-      {
-        "<leader>rr",
-        function()
-          require("telescope").extensions.refactoring.refactors()
-        end,
-        desc = "Refactor",
-      },
-    },
-  },
+  -- {
+  --   "nvim-pack/nvim-spectre",
+  --   opts = { open_cmd = "noswapfile vnew" },
+  --   keys = {
+  --     { "<leader>sr", "<cmd>lua require('spectre').open()<cr>", desc = "Open Spectre" },
+  --   },
+  --   dependencies = { "nvim-lua/plenary.nvim" },
+  -- },
   {
     "ThePrimeagen/harpoon",
     enabled = true,
@@ -378,11 +338,12 @@ return {
       "junegunn/fzf",
     },
     config = function()
-      require("bqf").setup()
+      require("bqf").setup {
+        preview = {
+          winblend = 0,
+        },
+      }
     end,
-    keys = {
-      { "<leader>qf", "<cmd>lua require('bqf').open()<cr>", desc = "Quickfix" },
-    },
   },
   {
     "windwp/nvim-ts-autotag",
@@ -451,7 +412,6 @@ return {
       { "K", "<cmd>Lspsaga hover_doc<CR>", desc = "Hover Doc" },
       { "<leader>gf", "<cmd>Lspsaga finder<CR>", desc = "LSP Finder" },
       { "<leader>gr", "<cmd>Lspsaga rename<CR>", desc = "Rename" },
-      { "<leader>t", "<cmd>Lspsaga term_toggle<CR>", desc = "Terminal" },
       { "<leader>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
       { "<leader>gpt", "<cmd>Lspsaga peek_type_definition<CR>", desc = "Preview Type Definition" },
       { "<leader>ol", "<cmd>Lspsaga outline<CR>", desc = "Outline" },
