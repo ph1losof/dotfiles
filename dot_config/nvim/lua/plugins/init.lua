@@ -13,6 +13,11 @@ return {
     opts = { snippet_engine = "luasnip" },
   },
   {
+    "tummetott/unimpaired.nvim",
+    event = "VeryLazy",
+    opts = {},
+  },
+  {
     "nvim-tree/nvim-tree.lua",
     opts = require "plugins.overrides.nvimtree",
   },
@@ -432,6 +437,17 @@ return {
   },
   {
     "nvim-telescope/telescope.nvim",
+    opts = function()
+      local conf = require "nvchad.configs.telescope"
+
+      conf.defaults.mappings.i = {
+        ["<C-j>"] = require("telescope.actions").move_selection_next,
+        ["<C-k>"] = require("telescope.actions").move_selection_previous,
+        ["<Esc>"] = require("telescope.actions").close,
+      }
+
+      return conf
+    end,
     keys = {
       { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
       { "<leader>fsd", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document symbols" },
