@@ -21,6 +21,7 @@ M = {
     "dot",
     "git_rebase",
     "gitattributes",
+    "prisma",
     "gitcommit",
     "gitignore",
     "html",
