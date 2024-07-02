@@ -20,6 +20,7 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     opts = require "plugins.overrides.nvimtree",
+    lazy = true,
   },
   {
     "folke/flash.nvim",
@@ -456,5 +457,37 @@ return {
       { "<leader>fq", "<cmd>Telescope quickfix<cr>", desc = "Quickfix" },
       { "<leader>fa", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
     },
+  },
+  {
+    "stevearc/oil.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    keys = {
+      { "<C-n>", "<cmd>Oil<cr>", desc = "Open parent directory" },
+    },
+    config = function()
+      require("oil").setup {
+        columns = { "icon" },
+        default_file_explorer = true,
+        keymaps = {
+          ["<C-h>"] = false,
+          ["<M-h>"] = "actions.select_split",
+        },
+        view_options = {
+          show_hidden = true,
+        },
+      }
+      require("oil").open()
+    end,
+    lazy = false,
+  },
+  {
+    "refractalize/oil-git-status.nvim",
+    dependencies = {
+      "stevearc/oil.nvim",
+    },
+    opts = {
+      show_ignored = true,
+    },
+    config = true,
   },
 }

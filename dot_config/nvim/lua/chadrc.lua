@@ -3,7 +3,6 @@
 
 ---@type ChadrcConfig
 local M = {}
-
 M.ui = {
   theme = "catppuccin",
   tabufline = {
@@ -18,7 +17,8 @@ M.ui = {
     },
   },
   nvdash = {
-    load_on_startup = true,
+    load_on_startup = false,
+    enabled = false,
   },
 }
 
