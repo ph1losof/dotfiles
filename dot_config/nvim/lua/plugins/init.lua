@@ -13,11 +13,6 @@ return {
     opts = { snippet_engine = "luasnip" },
   },
   {
-    "tummetott/unimpaired.nvim",
-    event = "VeryLazy",
-    opts = {},
-  },
-  {
     "nvim-tree/nvim-tree.lua",
     opts = require "plugins.overrides.nvimtree",
     lazy = true,
@@ -96,6 +91,11 @@ return {
         "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
         desc = "Buffer Diagnostics (Trouble)",
       },
+      {
+        "<leader>tq",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
     },
   },
   {
@@ -119,10 +119,10 @@ return {
     "hrsh7th/nvim-cmp",
     opts = {
       sources = {
+        { name = "luasnip" },
         { name = "nvim_lsp" },
         { name = "supermaven" },
         { name = "cmdline" },
-        { name = "luasnip" },
         { name = "buffer" },
         { name = "nvim_lua" },
         { name = "path" },
@@ -420,6 +420,7 @@ return {
       { "<leader>gr", "<cmd>Lspsaga rename<CR>", desc = "Rename" },
       { "<leader>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
       { "<leader>gpt", "<cmd>Lspsaga peek_type_definition<CR>", desc = "Preview Type Definition" },
+
       { "<leader>ol", "<cmd>Lspsaga outline<CR>", desc = "Outline" },
     },
     config = function()
@@ -468,15 +469,25 @@ return {
       require("oil").setup {
         columns = { "icon" },
         default_file_explorer = true,
+        skip_confirm_for_simple_edits = true,
+        delete_to_trash = true,
         keymaps = {
           ["<C-h>"] = false,
           ["<M-h>"] = "actions.select_split",
         },
         view_options = {
           show_hidden = true,
+          natural_order = true,
+
+          is_always_hidden = function(name, _)
+            return name == ".." or name == ".git"
+          end,
         },
       }
-      require("oil").open()
+
+      if vim.fn.argv(0) == "" then
+        vim.cmd "Oil"
+      end
     end,
     lazy = false,
   },
@@ -574,5 +585,31 @@ return {
         },
       }
     end,
+  },
+  {
+    "echasnovski/mini.move",
+    opts = {
+      mappings = {
+        left = "<S-left>",
+        right = "<S-right>",
+        down = "<S-down>",
+        up = "<S-up>",
+        line_left = "<S-left>",
+        line_right = "<S-right>",
+        line_down = "<S-down>",
+        line_up = "<S-up>",
+      },
+    },
+    config = function(_, opts)
+      require("mini.move").setup(opts)
+    end,
+    event = "VeryLazy",
+  },
+  {
+    "echasnovski/mini.bracketed",
+    config = function()
+      require("mini.bracketed").setup()
+    end,
+    event = "VeryLazy",
   },
 }
