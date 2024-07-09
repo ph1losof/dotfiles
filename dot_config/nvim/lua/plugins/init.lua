@@ -21,7 +21,13 @@ return {
     "folke/flash.nvim",
     event = "VeryLazy",
     ---@type Flash.Config
-    opts = {},
+    opts = {
+      modes = {
+        char = {
+          highlight = { backdrop = false },
+        },
+      },
+    },
     -- stylua: ignore
     keys = {
      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
@@ -435,6 +441,10 @@ return {
     "folke/todo-comments.nvim",
     event = "VimEnter",
     dependencies = { "nvim-lua/plenary.nvim" },
+    keys = {
+      { "<leader>ct", "<cmd>TodoTelescope<cr>", desc = "Todo Telescope" },
+      { "<leader>cq", "<cmd>TodoQuickFix<cr>", desc = "Todo Quickfix" },
+    },
     opts = { signs = false },
   },
   {
