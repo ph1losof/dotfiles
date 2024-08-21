@@ -1,21 +1,12 @@
 return {
   {
-    "danymat/neogen",
+    "sindrets/diffview.nvim",
+    event = "VeryLazy",
     keys = {
-      {
-        "<leader>cc",
-        function()
-          require("neogen").generate {}
-        end,
-        desc = "Neogen Comment",
-      },
+      { "<leader>hh", "<cmd>DiffviewOpen<cr>" },
+      { "<leader>hc", "<cmd>set hidden<cr><cmd>DiffviewClose<cr><cmd>set nohidden<cr>" },
     },
-    opts = { snippet_engine = "luasnip" },
-  },
-  {
-    "nvim-tree/nvim-tree.lua",
-    opts = require "plugins.overrides.nvimtree",
-    lazy = true,
+    opts = {},
   },
   {
     "folke/flash.nvim",
@@ -30,8 +21,8 @@ return {
     },
     -- stylua: ignore
     keys = {
-     { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-     { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end,       desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
     },
   },
   { "tpope/vim-sleuth", opts = {} },
@@ -379,7 +370,9 @@ return {
     },
     config = function()
       require("typescript-tools").setup {
-        on_attach = require("nvchad.configs.lspconfig").on_attach,
+        on_attach = function(client, bufnr)
+          require("nvchad.configs.lspconfig").on_attach(client, bufnr)
+        end,
         capabilities = require("nvchad.configs.lspconfig").capabilities,
         file_types = {
           "typescript",
@@ -424,7 +417,7 @@ return {
       { "K", "<cmd>Lspsaga hover_doc<CR>", desc = "Hover Doc" },
       { "<leader>gf", "<cmd>Lspsaga finder<CR>", desc = "LSP Finder" },
       { "<leader>gr", "<cmd>Lspsaga rename<CR>", desc = "Rename" },
-      { "<leader>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
+      { "<leager>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
       { "<leader>gpt", "<cmd>Lspsaga peek_type_definition<CR>", desc = "Preview Type Definition" },
 
       { "<leader>ol", "<cmd>Lspsaga outline<CR>", desc = "Outline" },
@@ -626,12 +619,30 @@ return {
     "laytan/tailwind-sorter.nvim",
     dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-lua/plenary.nvim" },
     build = "cd formatter && npm ci && npm run build",
-    event = "BufWritePre",
+    event = "VeryLazy",
     config = function()
       require("tailwind-sorter").setup {
         on_save_enabled = true, -- If `true`, automatically enables on save sorting.
         on_save_pattern = { "*.html", "*.js", "*.jsx", "*.tsx", "*.twig", "*.hbs", "*.php", "*.heex", "*.astro" }, -- The file patterns to watch and sort.
         node_path = "node",
+      }
+    end,
+  },
+  {
+    "JoosepAlviste/nvim-ts-context-commentstring",
+    config = function()
+      require("ts_context_commentstring").setup {
+        enable_autocmd = false,
+      }
+    end,
+  },
+  {
+    "numToStr/Comment.nvim",
+    dependencies = { "JoosepAlviste/nvim-ts-context-commentstring" },
+    lazy = false,
+    config = function()
+      require("Comment").setup {
+        pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
       }
     end,
   },

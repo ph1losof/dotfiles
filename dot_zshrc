@@ -117,12 +117,16 @@ source $ZSH/oh-my-zsh.sh
 export PATH="/Users/tentacles/Library/Application Support/fnm:$PATH"
 eval "`fnm env`"
 
+# zoxide
 eval "$(zoxide init zsh)"
 
+# thefuck
 eval $(thefuck --alias)
+
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
+# starship 
 eval "$(starship init zsh)"
 
 # bun completions
@@ -132,6 +136,11 @@ eval "$(starship init zsh)"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# atuin
 . "$HOME/.atuin/bin/env"
 
 eval "$(atuin init zsh)"
+
+# deno
+export DENO_INSTALL="/Users/tentacles/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
