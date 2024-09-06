@@ -63,8 +63,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
-vim.filetype.add {
-  pattern = {
-    ["^%.?env%.?[a-z]$"] = "dotenv",
-  },
-}
+-- Following function resets prettier and eslint when they do not load plugins correctly
+--[[ vim.api.nvim_create_autocmd("VimLeavePre", {
+  callback = function()
+    vim.fn.jobstart("killall prettierd eslint_d", { detach = true })
+  end,
+}) ]]

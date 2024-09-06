@@ -1,5 +1,10 @@
 return {
   {
+    "m4xshen/hardtime.nvim",
+    dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
+    opts = {},
+  },
+  {
     "sindrets/diffview.nvim",
     event = "VeryLazy",
     keys = {
@@ -8,23 +13,6 @@ return {
       { "<leader>dc", "<cmd>set hidden<cr><cmd>DiffviewClose<cr><cmd>set nohidden<cr>" },
     },
     opts = {},
-  },
-  {
-    "folke/flash.nvim",
-    event = "VeryLazy",
-    ---@type Flash.Config
-    opts = {
-      modes = {
-        char = {
-          highlight = { backdrop = false },
-        },
-      },
-    },
-    -- stylua: ignore
-    keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end,       desc = "Flash" },
-      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-    },
   },
   { "tpope/vim-sleuth", opts = {} },
   {
@@ -98,7 +86,7 @@ return {
   },
   {
     "kylechui/nvim-surround",
-    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    version = "*",
     event = "VeryLazy",
     config = function()
       require("nvim-surround").setup {}
@@ -180,14 +168,6 @@ return {
       { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
     },
   },
-  -- {
-  --   "nvim-pack/nvim-spectre",
-  --   opts = { open_cmd = "noswapfile vnew" },
-  --   keys = {
-  --     { "<leader>sr", "<cmd>lua require('spectre').open()<cr>", desc = "Open Spectre" },
-  --   },
-  --   dependencies = { "nvim-lua/plenary.nvim" },
-  -- },
   {
     "ThePrimeagen/harpoon",
     enabled = true,
@@ -259,7 +239,7 @@ return {
           function()
             harpoon:list():remove()
           end,
-          desc = "Add buffer to harpoon",
+          desc = "Delete buffer from harpoon",
         },
       }
     end,
@@ -420,7 +400,8 @@ return {
       { "<leader>gr", "<cmd>Lspsaga rename<CR>", desc = "Rename" },
       { "<leager>gp", "<cmd>Lspsaga peek_definition<CR>", desc = "Preview Definition" },
       { "<leader>gpt", "<cmd>Lspsaga peek_type_definition<CR>", desc = "Preview Type Definition" },
-
+      { "<leader>gd", "<cmd>Lspsaga goto_definition<CR>", desc = "Outline" },
+      { "<leader>gt", "<cmd>Lspsaga goto_type_definition<CR>", desc = "Outline" },
       { "<leader>ol", "<cmd>Lspsaga outline<CR>", desc = "Outline" },
     },
     config = function()
@@ -458,7 +439,7 @@ return {
       { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
       { "<leader>fsd", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document symbols" },
       { "<leader>fsw", "<cmd>Telescope lsp_workspace_symbols<cr>", desc = "Workspace symbols" },
-      { "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "Diagnostics" },
+      { "<leader>fd", "<cmd>Telecope diagnostics<cr>", desc = "Diagnostics" },
       { "<leader>fq", "<cmd>Telescope quickfix<cr>", desc = "Quickfix" },
       { "<leader>fa", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
     },
@@ -613,6 +594,16 @@ return {
     "echasnovski/mini.bracketed",
     config = function()
       require("mini.bracketed").setup()
+    end,
+    event = "VeryLazy",
+  },
+  {
+    "jinh0/eyeliner.nvim",
+    config = function()
+      require("eyeliner").setup {
+        highlight_on_key = true,
+        default_keymaps = true,
+      }
     end,
     event = "VeryLazy",
   },
