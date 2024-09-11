@@ -140,6 +140,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 . "$HOME/.atuin/bin/env"
 
 eval "$(atuin init zsh)"
+bindkey "^k" _atuin_search_widget
 
 # deno
 export DENO_INSTALL="/Users/tentacles/.deno"
