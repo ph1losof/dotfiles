@@ -141,6 +141,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 eval "$(atuin init zsh)"
 bindkey "^k" _atuin_search_widget
+bindkey '^y' autosuggest-accept
 
 # deno
 export DENO_INSTALL="/Users/tentacles/.deno"

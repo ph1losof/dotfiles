@@ -4,8 +4,8 @@ return {
     event = 'VimEnter',
     dependencies = { 'nvim-lua/plenary.nvim' },
     keys = {
-      { '<leader>ftc', '<cmd>TodoTelescope<cr>', desc = 'Todo Telescope' },
-      { '<leader>tcq', '<cmd>TodoQuickFix<cr>', desc = 'Todo Quickfix' },
+      { '<leader>ft', '<cmd>TodoTelescope<cr>', desc = 'Todo Telescope' },
+      { '<leader>tq', '<cmd>TodoQuickFix<cr>', desc = 'Todo Quickfix' },
     },
     opts = { signs = false },
   },

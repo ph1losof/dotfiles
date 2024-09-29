@@ -1,1 +1,1 @@
-chore(bindings): remove unused binding + add fav maps <C-l> <C-h>
+feat(startup): add startup time

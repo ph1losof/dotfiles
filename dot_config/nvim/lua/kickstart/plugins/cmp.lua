@@ -46,6 +46,7 @@ return {
           require('cmp').event:on('confirm_done', cmp_autopairs.on_confirm_done())
         end,
       },
+      'rafamadriz/friendly-snippets',
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lua',
       'hrsh7th/cmp-nvim-lsp',
@@ -59,6 +60,10 @@ return {
       luasnip.config.setup {}
 
       cmp.setup {
+        performance = {
+          debounce = 0, -- default is 60ms
+          throttle = 0, -- default is 30ms
+        },
         snippet = {
           expand = function(args)
             luasnip.lsp_expand(args.body)
@@ -85,15 +90,14 @@ return {
           --  This will expand snippets if the LSP sent a snippet.
           ['<C-y>'] = cmp.mapping.confirm { select = true },
 
-          ['<CR>'] = cmp.mapping.confirm {
-            behavior = cmp.ConfirmBehavior.Insert,
-            select = true,
-          },
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          ['<Tab>'] = cmp.mapping.select_next_item(),
-          ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          -- ['<CR>'] = cmp.mapping.confirm {
+          --   behavior = cmp.ConfirmBehavior.Insert,
+          --   select = true,
+          -- },
+          -- ['<Tab>'] = cmp.mapping.select_next_item(),
+          -- ['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -124,12 +128,12 @@ return {
         },
         sources = {
           { name = 'nvim_lsp' },
-          { name = 'supermaven' },
-          { name = 'cmdline' },
           { name = 'luasnip' },
+          { name = 'supermaven' },
+          { name = 'path' },
           { name = 'buffer' },
           { name = 'nvim_lua' },
-          { name = 'path' },
+          { name = 'cmdline' },
         },
       }
     end,
