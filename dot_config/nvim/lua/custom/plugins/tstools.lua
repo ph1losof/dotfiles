@@ -15,9 +15,13 @@ return {
       local api = require 'typescript-tools.api'
       require('typescript-tools').setup {
         handlers = {
-          ['textDocument/publishDiagnostics'] = api.filter_diagnostics          -- Ignore 'This may be converted to an async function' diagnostics.
- { 80006 },
+          ['textDocument/publishDiagnostics'] = api.filter_diagnostics { 80006 },
         },
+        single_file_support = false,
+        root_dir = function(fname)
+          local root_pattern = require('lspconfig').util.root_pattern 'package.json'
+          return root_pattern(fname)
+        end,
         file_types = {
           'typescript',
           'typescriptreact',

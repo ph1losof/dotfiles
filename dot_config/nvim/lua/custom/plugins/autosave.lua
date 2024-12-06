@@ -1,8 +1,8 @@
 return {
   {
     'okuuva/auto-save.nvim',
-    cmd = 'ASToggle', -- optional for lazy loading on command
-    event = { 'InsertLeave', 'TextChanged' }, -- optional for lazy loading on trigger events
+    cmd = 'ASToggle',
+    event = { 'InsertLeave', 'TextChanged' },
     config = function()
       require('auto-save').setup {
         condition = function(buf)
@@ -18,10 +18,10 @@ return {
             return false
           end
 
-          if fn.getbufvar(buf, '&modifiable') == 1 and utils.not_in(fn.getbufvar(buf, '&filetype'), {}) then
-            return true -- met condition(s), can save
+          if fn.getbufvar(buf, '&modifiable') == 1 and utils.not_in(fn.getbufvar(buf, '&filetype'), { 'sql' }) then
+            return true
           end
-          return false -- can't save
+          return false
         end,
       }
     end,

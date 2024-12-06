@@ -1,0 +1,3 @@
+# pack-refs with: peeled fully-peeled sorted 
+a556353d60833367b13739e660d4057a96f2f4fe refs/remotes/origin/main
+90bc1ac0ca5dbda2cb1b9c699e920b5655fe149e refs/remotes/origin/refactor/whiskers

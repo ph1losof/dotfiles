@@ -88,8 +88,8 @@ return {
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
       vim.keymap.set('n', '<leader>fw', builtin.live_grep, { desc = '[F]ind by [G]rep' })
-      vim.keymap.set('n', '<leader>fsd', builtin.lsp_document_symbols, { desc = '[F]ind [D]iagnostics' })
-      vim.keymap.set('n', '<leader>fsw', builtin.lsp_workspace_symbols, { desc = '[F]ind [W]orkspace [D]iagnostics' })
+      vim.keymap.set('n', '<leader>fsd', builtin.lsp_document_symbols, { desc = '[F]ind [S]ymbols in [D]ocument' })
+      vim.keymap.set('n', '<leader>fsw', builtin.lsp_workspace_symbols, { desc = '[F]ind [S]ymbols [W]orkspace' })
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
       vim.keymap.set('n', '<leader>f.', builtin.oldfiles, { desc = '[F]ind in Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
