@@ -18,6 +18,8 @@ alias ....='cd ../../..'
 alias fzfp='fzf --preview="bat --color=always --style=numbers --line-range :500 {}"'
 alias fzfn='nvim $(fzf --preview="bat --color=always --style=numbers --line-range :500 {}")'
 
+export LANG=en_US.UTF-8
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -155,3 +157,8 @@ if [ -f '/Users/tentacles/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/tenta
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/tentacles/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/tentacles/google-cloud-sdk/completion.zsh.inc'; fi
+
+export PATH="$HOME/.local/bin:$PATH"
+
+export ANTHROPIC_API_KEY="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"
+export OPENROUTER_API_KEY_AVANTE="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"
