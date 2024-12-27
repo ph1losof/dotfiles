@@ -73,7 +73,7 @@ shift + cmd - l : yabai -m window --resize right:20:0
 
 
 rcmd - a : open -a Zen\ Browser
-rcmd - t : open -a /Applications/Alacritty.app
+rcmd - t : open -a /Applications/Ghostty.app
 rcmd - f : open -a Finder
 rcmd - n : open -a /Applications/Notion.app
 rcmd - c : open -a /Applications/Notion Calendar.app
