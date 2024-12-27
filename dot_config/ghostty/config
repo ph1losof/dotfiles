@@ -10,7 +10,8 @@ font-feature = -calt
 # Mouse
 mouse-hide-while-typing = true
 cursor-style = block
-cursor-style-blink = true
+cursor-style-blink = false
+adjust-cursor-thickness=3
 
 
 # Theme
@@ -34,7 +35,7 @@ clipboard-trim-trailing-spaces = true
 clipboard-paste-protection = true
 
 # Shell
-shell-integration-features = cursor,sudo,no-title
+shell-integration-features = no-cursor,sudo,no-title
 shell-integration = zsh
 
 # Other
