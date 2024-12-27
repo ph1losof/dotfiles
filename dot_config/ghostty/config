@@ -1,0 +1,44 @@
+# Fonts
+font-family = ""
+font-family = JetBrains Mono
+font-codepoint-map = U+E000-U+F8FF=fontname
+font-size = 16
+font-thicken = true
+adjust-underline-position = 4
+font-feature = -calt
+
+# Mouse
+mouse-hide-while-typing = true
+cursor-style = block
+cursor-style-blink = true
+
+
+# Theme
+window-colorspace = display-p3
+theme = /Users/tentacles/.config/ghostty/themes/catpuccin-mocha.conf
+cursor-invert-fg-bg = true
+background-opacity = 1.0
+window-theme = ghostty
+background-blur-radius = 0
+
+# Window
+window-padding-y = 0
+window-padding-x = 0
+window-decoration = false
+macos-titlebar-style = hidden
+
+# Clipboard
+clipboard-read = allow
+clipboard-write = allow
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
+
+# Shell
+shell-integration-features = cursor,sudo,no-title
+shell-integration = zsh
+
+# Other
+macos-option-as-alt = true
+confirm-close-surface = false
+
+gtk-single-instance = true
