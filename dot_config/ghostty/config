@@ -16,7 +16,7 @@ adjust-cursor-thickness=3
 
 # Theme
 window-colorspace = display-p3
-theme = /Users/tentacles/.config/ghostty/themes/catpuccin-mocha.conf
+theme = catppuccin-mocha
 cursor-invert-fg-bg = true
 background-opacity = 1.0
 window-theme = ghostty
@@ -41,5 +41,10 @@ shell-integration = zsh
 # Other
 macos-option-as-alt = true
 confirm-close-surface = false
+
+# Ghostty Icon
+macos-icon = custom-style
+macos-icon-ghost-color = #bac2de
+macos-icon-screen-color = #89b4fa
 
 gtk-single-instance = true
