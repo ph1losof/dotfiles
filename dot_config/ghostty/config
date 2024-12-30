@@ -6,6 +6,7 @@ font-size = 16
 font-thicken = true
 adjust-underline-position = 4
 font-feature = -calt
+font-feature = -liga
 
 # Mouse
 mouse-hide-while-typing = true
@@ -41,10 +42,4 @@ shell-integration = zsh
 # Other
 macos-option-as-alt = true
 confirm-close-surface = false
-
-# Ghostty Icon
-macos-icon = custom-style
-macos-icon-ghost-color = #bac2de
-macos-icon-screen-color = #89b4fa
-
 gtk-single-instance = true
