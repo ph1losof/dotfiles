@@ -18,7 +18,6 @@ alias ....='cd ../../..'
 # I no longer use fzf for such operations
 alias fzfp='fzf --preview="bat --color=always --style=numbers --line-range :500 {}"'
 alias fzfn='nvim $(fzf --preview="bat --color=always --style=numbers --line-range :500 {}")'
-# using television now
 alias tvp='tv --preview="bat --color=always --style=numbers --line-range :500 {}"'
 alias tvn='nvim $(tv --preview="bat --color=always --style=numbers --line-range :500 {}")'
 
@@ -94,12 +93,27 @@ export LANG=en_US.UTF-8
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
-# remotely use vim
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # fnm
 export PATH="/Users/tentacles/Library/Application Support/fnm:$PATH"
