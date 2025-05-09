@@ -1,0 +1,18 @@
+{
+  "nativeMCPServers": {
+    "neovim": {
+      "disabled": false
+    },
+    "mcphub": {
+      "disabled": false
+    }
+  },
+  "mcpServers": [
+    {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "name": "github.com/upstash/context7-mcp"
+    }
+  ]
+}
+
