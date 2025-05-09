@@ -72,7 +72,7 @@ shift + cmd - k : yabai -m window --resize top:0:-20
 shift + cmd - l : yabai -m window --resize right:20:0
 
 
-rcmd - z : open -a Zen\ Browser
+rcmd - z : open -a Zen
 rcmd - a : open -a /Applications/Ghostty.app
 rcmd - f : open -a Finder
 rcmd - n : open -a /Applications/Notion.app
