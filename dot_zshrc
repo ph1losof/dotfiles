@@ -156,3 +156,11 @@ if [ -f '/Users/tentacles/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/tenta
 if [ -f '/Users/tentacles/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/tentacles/google-cloud-sdk/completion.zsh.inc'; fi
 
 export PATH="$HOME/.local/bin:$PATH"
+
+export TAVILY_API_KEY="*****************************************"
+
+export GEMINI_API_KEY="***************************************"
+
+export ANTHROPIC_API_KEY="************************************************************************************************************"
+
+export GRAVEYARD="/Users/tentacles/.Trash"
