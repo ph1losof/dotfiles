@@ -14,6 +14,7 @@ $c\
 $rust\
 $golang\
 $nodejs\
+$custom\
 $php\
 $java\
 $kotlin\
@@ -163,6 +164,26 @@ format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
 symbol = ""
 style = "bg:teal"
 format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
+
+[custom.package_manager]
+description = "Detected Node.js package manager"
+command = """
+if [ -f bun.lockb ] || [ -f bun.lock ]; then
+  echo "bun"
+elif [ -f deno.json ] || [ -f deno.jsonc ]; then
+  echo "deno"
+elif [ -f pnpm-lock.yaml ]; then
+  echo "pnpm"
+elif [ -f yarn.lock ]; then
+  echo "yarn"
+elif [ -f package-lock.json ]; then
+  echo "npm"
+fi
+"""
+detect_files = ["bun.lockb", "bun.lock", "deno.json", "deno.jsonc", "pnpm-lock.yaml", "yarn.lock", "package-lock.json"]
+style = "fg:base bg:teal"
+format = '[ $output ]($style)'
+
 
 [docker_context]
 symbol = ""
