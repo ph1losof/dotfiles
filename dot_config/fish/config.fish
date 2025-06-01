@@ -50,9 +50,6 @@ set -x TAVILY_API_KEY *****************************************
 
 set -x GEMINI_API_KEY ***************************************
 
-set -x ANTHROPIC_API_KEY ************************************************************************************************************
-
-
 # Keybinds section ------------------------------------------------------------
 
 # trigger autocompletion on Control-Y (neovim style)
@@ -74,3 +71,6 @@ if status is-interactive
     atuin init fish | source
     set fish_tmux_autostart true
 end
+
+# Created by `pipx` on 2025-06-01 16:30:29
+set PATH $PATH /Users/tentacles/.local/bin
