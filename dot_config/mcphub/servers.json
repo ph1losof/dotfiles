@@ -16,10 +16,12 @@
     {
       "command": "npx",
       "args": ["-y", "tavily-mcp@0.1.4"],
-      "name": "github.com/tavily-ai/tavily-mcp",
-      "env": {
-        "TAVILY_API_KEY": "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"
-      }
+      "name": "github.com/tavily-ai/tavily-mcp"
+    },
+    {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "name": "github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking"
     }
   ]
 }
