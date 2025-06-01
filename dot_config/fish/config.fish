@@ -1,0 +1,69 @@
+# Regular env section ---------------------------------------------------------
+
+if test -n "$SSH_CONNECTION"
+  set -gx EDITOR 'vim'
+else
+  set -gx EDITOR 'nvim'
+end
+
+set -gx LANG en_US.UTF-8
+
+
+# Third-party env section -----------------------------------------------------
+
+# Homebrew setup credits to https://github.com/tmwatchanan
+if test -d /home/linuxbrew/.linuxbrew # Linux
+	set -gx HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew"
+	set -gx HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
+	set -gx HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/Homebrew"
+else if test -d /opt/homebrew # MacOS
+	set -gx HOMEBREW_PREFIX "/opt/homebrew"
+	set -gx HOMEBREW_CELLAR "$HOMEBREW_PREFIX/Cellar"
+	set -gx HOMEBREW_REPOSITORY "$HOMEBREW_PREFIX/homebrew"
+end
+fish_add_path -gP "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin";
+! set -q MANPATH; and set MANPATH ''; set -gx MANPATH "$HOMEBREW_PREFIX/share/man" $MANPATH;
+! set -q INFOPATH; and set INFOPATH ''; set -gx INFOPATH "$HOMEBREW_PREFIX/share/info" $INFOPATH;
+
+# fnm setup
+# NOTE: fnm setup is here due to requirements of homebrew
+fnm env --use-on-cd --shell fish | source
+set FNM_PATH "/Users/tentacles/Library/Application Support/fnm"
+if [ -d "$FNM_PATH" ]
+  set PATH "$FNM_PATH" $PATH
+  fnm env | source
+end
+
+# deno
+set -x DENO_INSTALL /Users/tentacles/.deno
+set -x PATH $DENO_INSTALL/bin:$PATH
+
+# bun
+set -x BUN_INSTALL "$HOME/.bun"
+set -x PATH $BUN_INSTALL/bin $PATH
+
+# RIP command trashbin location
+set -x GRAVEYARD /Users/tentacles/.Trash
+
+
+# Keybinds section ------------------------------------------------------------
+
+# trigger autocompletion on Control-Y (neovim style)
+bind \cy forward-char
+
+
+# Init section ----------------------------------------------------------------
+
+# Starship prompt init with transience
+function starship_transient_prompt_func
+  starship module character
+end
+starship init fish | source
+enable_transience
+
+# Is interactive part
+if status is-interactive
+    fish_config theme choose "Catppuccin Mocha"
+    atuin init fish | source
+    set fish_tmux_autostart true
+end
