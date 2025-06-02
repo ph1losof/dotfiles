@@ -1,5 +1,8 @@
 # Regular env section ---------------------------------------------------------
 
+# Created by `pipx` on 2025-06-01 16:30:29
+set PATH $PATH /Users/tentacles/.local/bin
+
 if test -n "$SSH_CONNECTION"
   set -gx EDITOR 'vim'
 else
@@ -25,15 +28,6 @@ fish_add_path -gP "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin";
 ! set -q MANPATH; and set MANPATH ''; set -gx MANPATH "$HOMEBREW_PREFIX/share/man" $MANPATH;
 ! set -q INFOPATH; and set INFOPATH ''; set -gx INFOPATH "$HOMEBREW_PREFIX/share/info" $INFOPATH;
 
-# fnm setup
-# NOTE: fnm setup is here due to requirements of homebrew
-fnm env --use-on-cd --shell fish | source
-set FNM_PATH "/Users/tentacles/Library/Application Support/fnm"
-if [ -d "$FNM_PATH" ]
-  set PATH "$FNM_PATH" $PATH
-  fnm env | source
-end
-
 # deno
 set -x DENO_INSTALL /Users/tentacles/.deno
 set -x PATH $DENO_INSTALL/bin:$PATH
@@ -58,6 +52,9 @@ bind \cy forward-char
 
 # Init section ----------------------------------------------------------------
 
+# Mise activation
+mise activate fish | source
+
 # Starship prompt init with transience
 function starship_transient_prompt_func
   starship module character
@@ -71,6 +68,3 @@ if status is-interactive
     atuin init fish | source
     set fish_tmux_autostart true
 end
-
-# Created by `pipx` on 2025-06-01 16:30:29
-set PATH $PATH /Users/tentacles/.local/bin
