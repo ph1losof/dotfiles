@@ -1,27 +1,45 @@
 {
   "nativeMCPServers": {
-    "neovim": {
+    "mcphub": {
       "disabled": false
     },
-    "mcphub": {
+    "neovim": {
       "disabled": false
     }
   },
-  "mcpServers": [
-    {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
-      "name": "github.com/upstash/context7-mcp"
+  "mcpServers": {
+    "context7": {
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": "6000"
+      },
+      "args": ["-y", "@upstash/context7-mcp"],
+      "command": "npx"
     },
-    {
-      "command": "npx",
-      "args": ["-y", "tavily-mcp@0.1.4"],
-      "name": "github.com/tavily-ai/tavily-mcp"
+    "tavily": {
+      "env": {
+        "TAVILY_API_KEY": "*****************************************"
+      },
+      "args": ["-y", "tavily-mcp@0.2.2"],
+      "command": "npx"
     },
-    {
-      "command": "npx",
+    "sequential-thinking": {
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "name": "github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking"
+      "command": "npx"
+    },
+    "allpepper-memory-bank": {
+      "autoApprove": [
+        "memory_bank_read",
+        "memory_bank_write",
+        "memory_bank_update",
+        "list_projects",
+        "list_project_files"
+      ],
+      "args": ["-y", "@allpepper/memory-bank-mcp"],
+      "disabled": false,
+      "env": {
+        "MEMORY_BANK_ROOT": "/mnt/memory_bank"
+      },
+      "command": "npx"
     }
-  ]
+  }
 }
