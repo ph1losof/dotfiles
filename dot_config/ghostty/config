@@ -1,7 +1,7 @@
 # Fonts
 font-family = ""
 font-family = JetBrains Mono
-font-codepoint-map = U+E000-U+F8FF=fontname
+font-codepoint-map = U+E000-U+F8FF=JetBrains Mono
 font-size = 16
 font-thicken = true
 adjust-underline-position = 4
@@ -37,7 +37,7 @@ clipboard-paste-protection = true
 
 # Shell
 shell-integration-features = no-cursor,sudo,no-title
-shell-integration = zsh
+shell-integration = fish
 
 # Other
 macos-option-as-alt = true
