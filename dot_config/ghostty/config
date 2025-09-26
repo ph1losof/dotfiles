@@ -17,7 +17,7 @@ adjust-cursor-thickness=3
 
 # Theme
 window-colorspace = display-p3
-theme = catppuccin-mocha
+theme = Catppuccin Mocha
 cursor-invert-fg-bg = true
 background-opacity = 1.0
 window-theme = ghostty

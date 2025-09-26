@@ -40,9 +40,9 @@ set -x PATH $BUN_INSTALL/bin $PATH
 set -x GRAVEYARD /Users/tentacles/.Trash
 
 # API keys
-set -x TAVILY_API_KEY *****************************************
+set -x TAVILY_API_KEY ""
 
-set -x GEMINI_API_KEY ***************************************
+set -x GEMINI_API_KEY ""
 
 # Keybinds section ------------------------------------------------------------
 
