@@ -39,11 +39,6 @@ set -x PATH $BUN_INSTALL/bin $PATH
 # RIP command trashbin location
 set -x GRAVEYARD /Users/tentacles/.Trash
 
-# API keys
-set -x TAVILY_API_KEY ""
-
-set -x GEMINI_API_KEY ""
-
 # Keybinds section ------------------------------------------------------------
 
 # trigger autocompletion on Control-Y (neovim style)
@@ -68,3 +63,6 @@ if status is-interactive
     atuin init fish | source
     set fish_tmux_autostart true
 end
+
+# Added by Antigravity
+fish_add_path /Users/tentacles/.antigravity/antigravity/bin
