@@ -1,0 +1,145 @@
+# Start AeroSpace at login
+start-at-login = true
+
+# Normalizations (equivalent to BSP behavior)
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+# Default layout: 'tiles' is AeroSpace's equivalent of yabai's 'bsp'
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+# Mouse follows focus (like: yabai -m config mouse_follows_focus on)
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# Gaps (your window_gap was 6)
+[gaps]
+inner.horizontal = 6
+inner.vertical = 6
+outer.left = 0
+outer.bottom = 0
+outer.top = 0
+outer.right = 0
+
+# Keyboard layout
+[key-mapping]
+preset = 'qwerty'
+
+# ==========================================
+# Main mode bindings
+# ==========================================
+[mode.main.binding]
+
+# -- Changing Window Focus (was: alt-hjkl) --
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+alt-l = 'focus right'
+
+# -- Focus monitor (was: alt-s/g for display west/east) --
+alt-s = 'focus-monitor left'
+alt-g = 'focus-monitor right'
+
+# -- Swap windows (was: shift+alt-hjkl) --
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+# -- Toggle float (was: shift+alt-t) --
+alt-shift-t = 'layout floating tiling'
+
+# -- Maximize / fullscreen (was: shift+alt-m) --
+alt-shift-m = 'fullscreen'
+
+# -- Balance windows (was: shift+alt-e) --
+alt-shift-e = 'balance-sizes'
+
+# -- Move window to monitor (was: shift+alt-s/g) --
+alt-shift-s = ['move-node-to-monitor left', 'focus-monitor left']
+alt-shift-g = ['move-node-to-monitor right', 'focus-monitor right']
+
+# -- Switch workspace --
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+
+# -- Move window to workspace (was: shift+alt-1..7) --
+alt-shift-1 = 'move-node-to-workspace 1'
+alt-shift-2 = 'move-node-to-workspace 2'
+alt-shift-3 = 'move-node-to-workspace 3'
+alt-shift-4 = 'move-node-to-workspace 4'
+alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-6 = 'move-node-to-workspace 6'
+alt-shift-7 = 'move-node-to-workspace 7'
+
+# -- Move to prev/next workspace (was: shift+alt-p/n) --
+alt-shift-p = 'move-node-to-workspace prev'
+alt-shift-n = 'move-node-to-workspace next'
+
+# -- Rotate layout (was: shift+alt-r for rotate 270) --
+alt-shift-r = 'layout tiles horizontal vertical'
+
+# -- Resize mode (was: shift+cmd-hjkl) --
+alt-r = 'mode resize'
+
+# -- Reload config --
+alt-shift-c = 'reload-config'
+
+# ==========================================
+# Resize mode (was: shift+cmd-hjkl)
+# ==========================================
+[mode.resize.binding]
+h = 'resize width -50'
+j = 'resize height +50'
+k = 'resize height -50'
+l = 'resize width +50'
+enter = 'mode main'
+esc = 'mode main'
+
+# ==========================================
+# Floating app exclusions
+# ==========================================
+[[on-window-detected]]
+if.app-id = 'com.apple.systempreferences'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.calculator'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'CleanShot'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'org.pqrs.Karabiner-Elements.Settings'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.QuickTimePlayerX'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.archiveutility'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.DiskUtility'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.ActivityMonitor'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Preview'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Screen Studio'
+run = 'layout floating'
