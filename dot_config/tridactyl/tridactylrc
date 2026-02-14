@@ -1,0 +1,10 @@
+" Navigate tabs matching Zen's sidebar order (skips hidden workspace tabs)
+command zen_tabnext jsb browser.tabs.query({currentWindow: true, hidden: false}).then(tabs => { tabs.sort((a, b) => a.index - b.index); const idx = tabs.findIndex(t => t.active); const next = tabs[(idx + 1) % tabs.length]; browser.tabs.update(next.id, {active: true}); })
+
+command zen_tabprev jsb browser.tabs.query({currentWindow: true, hidden: false}).then(tabs => { tabs.sort((a, b) => a.index - b.index); const idx = tabs.findIndex(t => t.active); const prev = tabs[(idx - 1 + tabs.length) % tabs.length]; browser.tabs.update(prev.id, {active: true}); })
+
+" Rebind navigation keys
+bind K zen_tabprev
+bind J zen_tabnext
+bind gT zen_tabnext
+bind gt zen_tabprev
