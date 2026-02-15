@@ -8,7 +8,7 @@ command = ["fd -t f", "fd -t f -H"]
 
 [preview]
 command = "bat -n --color=always '{}'"
-env = { BAT_THEME = "ansi" }
+env = { BAT_THEME = "Catppuccin Mocha" }
 
 [keybindings]
 shortcut = "f1"
@@ -16,6 +16,6 @@ f12 = "actions:edit"
 
 [actions.edit]
 description = "Opens the selected entries with the default editor (falls back to vim)"
-command = "${EDITOR:-vim} '{}'"
+command = "nvim '{}'"
 # use `mode = "fork"` if you want to return to tv afterwards
 mode = "execute"

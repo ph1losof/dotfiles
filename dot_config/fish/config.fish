@@ -61,6 +61,10 @@ enable_transience
 if status is-interactive
     fish_config theme choose "Catppuccin Mocha"
     atuin init fish | source
+    tv init fish | source
+    # tv binds ctrl-r to its own history; rebind to atuin's
+    bind --mode default ctrl-r _atuin_search
+    bind --mode insert ctrl-r _atuin_search
     set fish_tmux_autostart true
 end
 

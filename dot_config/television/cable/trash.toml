@@ -1,0 +1,24 @@
+[metadata]
+name = "trash"
+description = "Browse and manage files in trash"
+requirements = ["fd"]
+
+[source]
+command = "fd -d 1 . $HOME/.Trash"
+
+[preview]
+command = "ls -la '{}' 2>/dev/null || file '{}'"
+
+[keybindings]
+enter = "actions:reveal"
+ctrl-d = "actions:delete"
+
+[actions.reveal]
+description = "Reveal the selected file in Finder"
+command = "open -R '{}'"
+mode = "fork"
+
+[actions.delete]
+description = "Permanently delete the selected file"
+command = "rm -rf '{}'"
+mode = "fork"

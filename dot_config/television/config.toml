@@ -138,6 +138,7 @@ fallback_channel = "files"
   "head",
   "tail",
   "vim",
+  "nvim",
   "nano",
   "bat",
   "cp",
@@ -163,14 +164,25 @@ fallback_channel = "files"
   "git pull",
   "git push",
 ]
-"docker-images" = ["docker run"]
-"git-repos" = ["nvim", "code", "hx", "git clone"]
+"git-stash" = ["git stash"]
+"git-log" = ["git log"]
+"docker-images" = ["docker run", "docker pull"]
+"docker-containers" = [
+  "docker start",
+  "docker stop",
+  "docker restart",
+  "docker exec",
+  "docker logs",
+  "docker rm",
+]
+"brew-packages" = ["brew install", "brew uninstall", "brew upgrade", "brew info"]
+"tmux-sessions" = ["tmux attach", "tmux switch", "tmux kill-session"]
+"ssh-hosts" = ["ssh", "scp", "rsync"]
+"git-repos" = ["code", "hx", "git clone"]
 
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv
 # for shell autocomplete
 "smart_autocomplete" = "ctrl-t"
-# controls which keybinding should trigger tv
-# for command history
-"command_history" = "ctrl-r"
+# command_history is handled by atuin, not tv

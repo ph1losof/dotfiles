@@ -6,6 +6,14 @@ requirements = ["fd", "bat"]
 [source]
 command = "fd -t f . $HOME/.config"
 
-
 [preview]
 command = "bat -n --color=always '{}'"
+env = { BAT_THEME = "Catppuccin Mocha" }
+
+[keybindings]
+enter = "actions:edit"
+
+[actions.edit]
+description = "Open the selected dotfile in neovim"
+command = "nvim '{}'"
+mode = "execute"
