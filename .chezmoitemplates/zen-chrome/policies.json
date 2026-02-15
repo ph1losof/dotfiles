@@ -1,0 +1,22 @@
+{
+  "policies": {
+    "ExtensionSettings": {
+      "tridactyl.vim@cmcaine.co.uk": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/tridactyl-vim/latest.xpi",
+        "installation_mode": "normal_installed"
+      },
+      "uBlock0@raymondhill.net": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi",
+        "installation_mode": "normal_installed"
+      },
+      "{d634138d-c276-4fc8-924b-40a0ea21d284}": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/1password-x-password-manager/latest.xpi",
+        "installation_mode": "normal_installed"
+      },
+      "surge@surge-downloader.com": {
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/surge/latest.xpi",
+        "installation_mode": "normal_installed"
+      }
+    }
+  }
+}

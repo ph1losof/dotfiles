@@ -4,6 +4,8 @@
 # userChrome.css: {{ include ".chezmoitemplates/zen-chrome/userChrome.css" | sha256sum }}
 # userContent.css: {{ include ".chezmoitemplates/zen-chrome/userContent.css" | sha256sum }}
 # zen-logo-mocha.svg: {{ include ".chezmoitemplates/zen-chrome/zen-logo-mocha.svg" | sha256sum }}
+# user.js: {{ include ".chezmoitemplates/zen-chrome/user.js" | sha256sum }}
+# policies.json: {{ include ".chezmoitemplates/zen-chrome/policies.json" | sha256sum }}
 
 set -euo pipefail
 
@@ -43,4 +45,37 @@ cat > "$CHROME_DIR/zen-logo-mocha.svg" << 'CHEZMOI_EOF'
 {{ include ".chezmoitemplates/zen-chrome/zen-logo-mocha.svg" }}
 CHEZMOI_EOF
 
+PROFILE_DIR="$ZEN_DIR/$PROFILE_REL"
+
+cat > "$PROFILE_DIR/user.js" << 'CHEZMOI_EOF'
+{{ include ".chezmoitemplates/zen-chrome/user.js" }}
+CHEZMOI_EOF
+
+# Install policies.json for extension auto-install
+{{ if eq .chezmoi.os "darwin" -}}
+DIST_DIR="/Applications/Zen Browser.app/Contents/Resources/distribution"
+{{ else -}}
+# Try common Linux locations
+if [ -d "/opt/zen-browser" ]; then
+    DIST_DIR="/opt/zen-browser/distribution"
+elif [ -d "/usr/lib/zen-browser" ]; then
+    DIST_DIR="/usr/lib/zen-browser/distribution"
+elif [ -d "/usr/lib/zen" ]; then
+    DIST_DIR="/usr/lib/zen/distribution"
+else
+    DIST_DIR=""
+fi
+{{ end -}}
+
+if [ -n "$DIST_DIR" ]; then
+    mkdir -p "$DIST_DIR"
+    cat > "$DIST_DIR/policies.json" << 'CHEZMOI_EOF'
+{{ include ".chezmoitemplates/zen-chrome/policies.json" }}
+CHEZMOI_EOF
+    echo "Zen policies.json installed to: $DIST_DIR/policies.json"
+else
+    echo "Warning: Could not find Zen Browser installation directory for policies.json"
+fi
+
 echo "Zen chrome files installed to: $CHROME_DIR"
+echo "Zen user.js installed to: $PROFILE_DIR/user.js"
