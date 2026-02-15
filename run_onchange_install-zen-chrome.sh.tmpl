@@ -1,0 +1,46 @@
+#!/bin/bash
+# Install Zen Browser chrome files into the active profile.
+# Hashes of source files (triggers re-run on change):
+# userChrome.css: {{ include ".chezmoitemplates/zen-chrome/userChrome.css" | sha256sum }}
+# userContent.css: {{ include ".chezmoitemplates/zen-chrome/userContent.css" | sha256sum }}
+# zen-logo-mocha.svg: {{ include ".chezmoitemplates/zen-chrome/zen-logo-mocha.svg" | sha256sum }}
+
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+ZEN_DIR="$HOME/Library/Application Support/zen"
+{{ else -}}
+ZEN_DIR="$HOME/.zen"
+{{ end -}}
+
+PROFILES_INI="$ZEN_DIR/profiles.ini"
+
+if [ ! -f "$PROFILES_INI" ]; then
+    echo "Zen Browser profiles.ini not found, skipping."
+    exit 0
+fi
+
+# Find the default profile path from the [Install*] section
+PROFILE_REL=$(awk -F= '/^\[Install/ { in_install=1; next } /^\[/ { in_install=0 } in_install && /^Default=/ { print $2; exit }' "$PROFILES_INI")
+
+if [ -z "$PROFILE_REL" ]; then
+    echo "Could not detect default Zen profile, skipping."
+    exit 0
+fi
+
+CHROME_DIR="$ZEN_DIR/$PROFILE_REL/chrome"
+mkdir -p "$CHROME_DIR"
+
+cat > "$CHROME_DIR/userChrome.css" << 'CHEZMOI_EOF'
+{{ include ".chezmoitemplates/zen-chrome/userChrome.css" }}
+CHEZMOI_EOF
+
+cat > "$CHROME_DIR/userContent.css" << 'CHEZMOI_EOF'
+{{ include ".chezmoitemplates/zen-chrome/userContent.css" }}
+CHEZMOI_EOF
+
+cat > "$CHROME_DIR/zen-logo-mocha.svg" << 'CHEZMOI_EOF'
+{{ include ".chezmoitemplates/zen-chrome/zen-logo-mocha.svg" }}
+CHEZMOI_EOF
+
+echo "Zen chrome files installed to: $CHROME_DIR"
