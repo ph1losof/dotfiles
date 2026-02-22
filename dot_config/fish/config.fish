@@ -59,7 +59,6 @@ enable_transience
 
 # Is interactive part
 if status is-interactive
-    fish_config theme choose "Catppuccin Mocha"
     atuin init fish | source
     tv init fish | source
     # tv binds ctrl-r to its own history; rebind to atuin's
