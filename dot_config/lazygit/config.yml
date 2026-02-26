@@ -1,0 +1,6 @@
+customCommands:
+  - key: "C"
+    context: "files"
+    description: "Generate commit message with Claude Code"
+    command: "fish -c 'claude-commit --direct'"
+    loadingText: "Generating commit message with Claude..."

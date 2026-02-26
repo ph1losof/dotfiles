@@ -39,6 +39,9 @@ set -x PATH $BUN_INSTALL/bin $PATH
 # RIP command trashbin location
 set -x GRAVEYARD /Users/tentacles/.Trash
 
+# Lazygit config location
+set -x LG_CONFIG_FILE "$HOME/.config/lazygit/config.yml"
+
 # Keybinds section ------------------------------------------------------------
 
 # trigger autocompletion on Control-Y (neovim style)
