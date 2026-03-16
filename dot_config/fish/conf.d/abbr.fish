@@ -2,6 +2,7 @@ abbr vim nvim
 abbr .. 'cd ..'
 abbr ... 'cd ../..'
 abbr lsd 'lsd -Fla'
+abbr lg 'lazygit'
 abbr .... 'cd ../../..'
 
 # Git
