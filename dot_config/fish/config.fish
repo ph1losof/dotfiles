@@ -63,6 +63,14 @@ enable_transience
 # Is interactive part
 if status is-interactive
     atuin init fish | source
+    # Disable Atuin AI '?' keybind so `??` can be typed normally
+    bind "?" self-insert
+    if bind -M insert >/dev/null 2>&1
+        bind -M insert "?" self-insert
+    end
+    if bind -M default >/dev/null 2>&1
+        bind -M default "?" self-insert
+    end
     tv init fish | source
     # tv binds ctrl-r to its own history; rebind to atuin's
     bind --mode default ctrl-r _atuin_search
