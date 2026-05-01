@@ -77,6 +77,3 @@ if status is-interactive
     bind --mode insert ctrl-r _atuin_search
     set fish_tmux_autostart true
 end
-
-# Added by Antigravity
-fish_add_path /Users/tentacles/.antigravity/antigravity/bin
