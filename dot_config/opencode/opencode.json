@@ -1,6 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "enabled_providers": ["openai"],
+  "plugin": ["@ex-machina/opencode-anthropic-auth@1.8.0"],
+  "enabled_providers": ["openai", "anthropic"],
   "mcp": {
     "context7": {
       "type": "remote",
