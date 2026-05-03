@@ -162,18 +162,14 @@ format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
 [custom.package_manager]
 description = "Detected Node.js package manager"
 command = """
-if test -f bun.lockb; or test -f bun.lock
-    echo "bun"
-else if test -f deno.json; or test -f deno.jsonc
-    echo "deno"
-else if test -f pnpm-lock.yaml
-    echo "pnpm"
-else if test -f yarn.lock
-    echo "yarn"
-else if test -f package-lock.json
-    echo "npm"
-end
+[ -f bun.lockb ] || [ -f bun.lock ] && printf 'bun' || \
+[ -f deno.json ] || [ -f deno.jsonc ] && printf 'deno' || \
+[ -f pnpm-lock.yaml ] && printf 'pnpm' || \
+[ -f yarn.lock ] && printf 'yarn' || \
+[ -f package-lock.json ] && printf 'npm'
 """
+shell = ["sh", "-c"]
+use_stdin = false
 detect_files = ["bun.lockb", "bun.lock", "deno.json", "deno.jsonc", "pnpm-lock.yaml", "yarn.lock", "package-lock.json"]
 style = "fg:base bg:teal"
 format = '[ $output ]($style)'

@@ -22,9 +22,10 @@ function "??" --description "Ask AI a question from the terminal"
         set opencode_model $OPENCODE_MODEL
     end
     set -l raw_file (mktemp /tmp/ask_ai_raw.XXXXXX)
-    set -l opencode_config '{"mcp":{"context7":{"enabled":false}},"agent":{"quick-chat":{"mode":"primary","permission":"deny","tools":{"question":false,"bash":false,"read":false,"glob":false,"grep":false,"edit":false,"write":false,"task":false,"webfetch":false,"todowrite":false,"skill":false},"prompt":"Direct terminal Q&A mode. Never call tools. If live data is requested, say you cannot fetch live data and give a short best-effort answer. Never mention internal step limits or agent state."}}}'
+    set -l err_file (mktemp /tmp/ask_ai_err.XXXXXX)
+    set -l opencode_config '{"mcp":{"context7":{"enabled":false}},"agent":{"quick-chat":{"mode":"primary","permission":{"read":"deny","edit":"deny","glob":"deny","grep":"deny","list":"deny","bash":"deny","task":"deny","todowrite":"deny","question":"deny","webfetch":"deny","websearch":"deny","skill":"deny"},"prompt":"Direct terminal Q&A mode. Never call tools. If live data is requested, say you cannot fetch live data and give a short best-effort answer. Never mention internal step limits or agent state."}}}'
 
-    env OPENCODE_CONFIG_CONTENT="$opencode_config" opencode run --format json --agent quick-chat --model $opencode_model --variant minimal --dir /tmp "$prompt" >$raw_file 2>/dev/null
+    env OPENCODE_CONFIG_CONTENT="$opencode_config" opencode run --format json --agent quick-chat --model $opencode_model --variant minimal --dir /tmp "$prompt" >$raw_file 2>$err_file
     set -l opencode_status $status
     set -l response (jq -rs -r 'map(select(.type == "text") | .part.text) | join("")' $raw_file 2>/dev/null)
 
@@ -32,6 +33,9 @@ function "??" --description "Ask AI a question from the terminal"
         printf "%s\n" "$response"
     else if test $opencode_status -ne 0
         echo "Failed to get response from OpenCode"
+        if test -s $err_file
+            string collect <$err_file
+        end
     end
 
     set -l tokens (jq -rs -r 'map(select(.type == "step_finish") | .part.tokens.total) | last // empty' $raw_file 2>/dev/null)
@@ -41,6 +45,6 @@ function "??" --description "Ask AI a question from the terminal"
         echo $tokens
     end
 
-    rm -f $raw_file
+    rm -f $raw_file $err_file
     return $opencode_status
 end

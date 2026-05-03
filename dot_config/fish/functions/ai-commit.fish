@@ -25,13 +25,14 @@ function ai-commit --description "Generate a commit message with OpenCode"
     set -l prompt "Generate a git commit message for these staged changes following the Conventional Commits spec. Format: <type>(<optional scope>): <description>. Types: feat, fix, refactor, perf, docs, style, test, build, ci, chore. Use ! before : for breaking changes. Keep the subject under 72 chars. Add a body only if the changes are complex enough to warrant explanation. Focus on WHY the change was made, not just what changed - a developer reading this in 6 months should understand the intent. Output ONLY the raw commit message, no markdown, no code blocks, no backticks."
     set -l msg_file (mktemp /tmp/commit_msg.XXXXXX)
     set -l diff_file (mktemp /tmp/commit_diff.XXXXXX)
-    set -l opencode_model openai/gpt-5.3-codex-spark
+    set -l err_file (mktemp /tmp/commit_err.XXXXXX)
+    set -l opencode_model openai/gpt-5.4-fast
     if set -q OPENCODE_COMMIT_MODEL
         set opencode_model $OPENCODE_COMMIT_MODEL
     else if set -q OPENCODE_MODEL
         set opencode_model $OPENCODE_MODEL
     end
-    set -l opencode_config '{"mcp":{"context7":{"enabled":false}},"agent":{"quick-commit":{"mode":"primary","permission":"deny","tools":{"question":false,"bash":false,"read":false,"glob":false,"grep":false,"edit":false,"write":false,"task":false,"webfetch":false,"todowrite":false,"skill":false},"prompt":"You write Conventional Commit messages from a provided staged diff. Never call tools. Return only the raw commit message."}}}'
+    set -l opencode_config '{"mcp":{"context7":{"enabled":false}},"agent":{"quick-commit":{"mode":"primary","permission":{"read":"deny","edit":"deny","glob":"deny","grep":"deny","list":"deny","bash":"deny","task":"deny","todowrite":"deny","question":"deny","webfetch":"deny","websearch":"deny","skill":"deny"},"prompt":"You write Conventional Commit messages from a provided staged diff. Never call tools. Return only the raw commit message."}}}'
 
     # Stage all changes if nothing is staged
     if test -z "$(git diff --cached --name-only)"
@@ -41,7 +42,7 @@ function ai-commit --description "Generate a commit message with OpenCode"
     git diff --staged >$diff_file
 
     set -l opencode_prompt "$prompt Use the attached file as the complete staged diff."
-    env OPENCODE_CONFIG_CONTENT="$opencode_config" opencode run --format json --agent quick-commit --model $opencode_model --variant minimal --dir /tmp "$opencode_prompt" --file $diff_file 2>/dev/null | jq -rs -r '([ .[] | select(.type == "text" and (.part.metadata.openai.phase? == "final_answer")) | .part.text ] | last) // ([ .[] | select(.type == "text") | .part.text ] | last) // empty' >$msg_file &
+    env OPENCODE_CONFIG_CONTENT="$opencode_config" opencode run --format json --agent quick-commit --model $opencode_model --variant minimal --dir /tmp "$opencode_prompt" --file $diff_file 2>$err_file | jq -rs -r '([ .[] | select(.type == "text" and (.part.metadata.openai.phase? == "final_answer")) | .part.text ] | last) // ([ .[] | select(.type == "text") | .part.text ] | last) // empty' >$msg_file &
     set pid (jobs -lp | tail -1)
 
     if test "$direct" = false
@@ -67,14 +68,17 @@ function ai-commit --description "Generate a commit message with OpenCode"
             git commit -e -F $msg_file
         end
         set -l commit_status $status
-        rm -f $msg_file $diff_file
+        rm -f $msg_file $diff_file $err_file
         return $commit_status
     end
 
     if test "$direct" = false
         printf "\e[31m✗ Failed to generate commit message with OPENCODE\e[0m\n"
+        if test -s $err_file
+            string collect <$err_file
+        end
         sleep 1
     end
-    rm -f $msg_file $diff_file
+    rm -f $msg_file $diff_file $err_file
     return 1
 end
