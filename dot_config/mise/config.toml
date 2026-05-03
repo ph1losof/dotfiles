@@ -16,6 +16,7 @@ java = "latest"
 ruby = "latest"
 terraform = "latest"
 postgres = "latest"
+aube = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = ["node"]
