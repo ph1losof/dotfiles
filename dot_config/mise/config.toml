@@ -2,7 +2,7 @@
 node = "latest"
 npm = "latest"
 pnpm = "latest"
-rust = "latest"
+rust = "beta"
 yarn = "latest"
 go = "latest"
 python = "latest"
