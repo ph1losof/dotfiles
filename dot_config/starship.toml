@@ -162,11 +162,17 @@ format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
 [custom.package_manager]
 description = "Detected Node.js package manager"
 command = """
-[ -f bun.lockb ] || [ -f bun.lock ] && printf 'bun' || \
-[ -f deno.json ] || [ -f deno.jsonc ] && printf 'deno' || \
-[ -f pnpm-lock.yaml ] && printf 'pnpm' || \
-[ -f yarn.lock ] && printf 'yarn' || \
-[ -f package-lock.json ] && printf 'npm'
+if [ -f pnpm-lock.yaml ]; then
+  printf 'pnpm'
+elif [ -f bun.lockb ] || [ -f bun.lock ]; then
+  printf 'bun'
+elif [ -f deno.json ] || [ -f deno.jsonc ]; then
+  printf 'deno'
+elif [ -f yarn.lock ]; then
+  printf 'yarn'
+elif [ -f package-lock.json ]; then
+  printf 'npm'
+fi
 """
 shell = ["sh", "-c"]
 use_stdin = false
