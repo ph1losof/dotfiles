@@ -77,3 +77,10 @@ if status is-interactive
     bind --mode insert ctrl-r _atuin_search
     set fish_tmux_autostart true
 end
+
+# Added by Radicle.
+export PATH="$PATH:/Users/tentacles/.radicle/bin"
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
