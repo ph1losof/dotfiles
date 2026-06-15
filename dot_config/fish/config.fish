@@ -29,12 +29,16 @@ fish_add_path -gP "$HOMEBREW_PREFIX/bin" "$HOMEBREW_PREFIX/sbin";
 ! set -q INFOPATH; and set INFOPATH ''; set -gx INFOPATH "$HOMEBREW_PREFIX/share/info" $INFOPATH;
 
 # deno
-set -x DENO_INSTALL /Users/tentacles/.deno
-set -x PATH $DENO_INSTALL/bin:$PATH
+# NOTE: use fish_add_path (idempotent + deduping). The old form
+# `set -x PATH $DENO_INSTALL/bin:$PATH` exported PATH and re-prepended on every
+# nested shell (tmux panes/subshells), exploding PATH to 1000+ entries and
+# slowing `mise hook-env` (runs every prompt) from ~8ms to 300ms+.
+set -gx DENO_INSTALL /Users/tentacles/.deno
+fish_add_path -gP $DENO_INSTALL/bin
 
 # bun
-set -x BUN_INSTALL "$HOME/.bun"
-set -x PATH $BUN_INSTALL/bin $PATH
+set -gx BUN_INSTALL "$HOME/.bun"
+fish_add_path -gP $BUN_INSTALL/bin
 
 # RIP command trashbin location
 set -x GRAVEYARD /Users/tentacles/.Trash
@@ -79,7 +83,7 @@ if status is-interactive
 end
 
 # Added by Radicle.
-export PATH="$PATH:/Users/tentacles/.radicle/bin"
+fish_add_path -gaP /Users/tentacles/.radicle/bin
 
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.
