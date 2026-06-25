@@ -1,0 +1,22 @@
+[tools]
+node = "latest"
+npm = "latest"
+pnpm = "latest"
+rust = "beta"
+yarn = "latest"
+go = "latest"
+python = "latest"
+neovim = "latest"
+bun = "latest"
+deno = "latest"
+mysql = "latest"
+pipx = "latest"
+gleam = "latest"
+java = "latest"
+ruby = "latest"
+terraform = "latest"
+postgres = "latest"
+aube = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node"]

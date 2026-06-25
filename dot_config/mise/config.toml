@@ -1,22 +1,27 @@
 [tools]
-node = "latest"
-npm = "latest"
-pnpm = "latest"
-rust = "beta"
-yarn = "latest"
-go = "latest"
-python = "latest"
-neovim = "latest"
-bun = "latest"
-deno = "latest"
-mysql = "latest"
-pipx = "latest"
-gleam = "latest"
-java = "latest"
-ruby = "latest"
-terraform = "latest"
-postgres = "latest"
-aube = "latest"
+# Pinned to exact installed versions so `mise hook-env` (runs every prompt)
+# never resolves a "latest"/"beta" alias over the network. Bump manually with
+# `mise install <tool>@<new>` then update the line here.
+node = "26.3.0"
+npm = "11.16.0"
+pnpm = "11.5.3"
+rust = "beta"       # symlink backend -> ~/.cargo/bin (rustup-managed); resolves locally, no network
+yarn = "4.16.0"
+go = "1.26.4"
+python = "3.14.6"
+neovim = "0.12.3"
+bun = "1.3.14"
+deno = "2.8.2"
+mysql = "8.0.33"
+pipx = "1.14.0"
+gleam = "1.17.0"
+java = "26.0.1"
+ruby = "4.0.5"
+terraform = "1.15.6"
+aube = "1.18.2"
+# postgres removed: it was never installed and `postgres@latest` forced a
+# network version-list fetch on every prompt (~325ms). Re-add a concrete
+# version if you actually install it.
 
 [settings]
 idiomatic_version_file_enable_tools = ["node"]
