@@ -1,7 +1,7 @@
 [keybindings]
 scroll_up = "ctrl+shift+u"
 scroll_down = "ctrl+shift+d"
-scroll_page_up = "ctrl+u"
+scroll_page_up = ""
 scroll_page_down = "ctrl+d"
 model_switch_next = "ctrl+tab"
 model_switch_prev = "ctrl+shift+tab"
