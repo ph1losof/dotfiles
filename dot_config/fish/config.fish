@@ -88,3 +88,21 @@ fish_add_path -gaP /Users/tentacles/.radicle/bin
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
+
+# kimi-code
+fish_add_path -g "/Users/tentacles/.kimi-code/bin"
+
+# strix
+fish_add_path /Users/tentacles/.strix/bin
+
+# Mercury shell integration ---------------------------------------------------
+
+# Emits authenticated OSC 133 prompt boundaries so the Mercury daemon can grant
+# speculative local echo — the thing that makes typing feel local over a link.
+# Without it the daemon has only bracketed-paste plus the kernel's view of the
+# PTY, and under tmux that view describes tmux, not this shell.
+#
+# Must stay LAST in this file: the snippet wraps `fish_prompt`, so it has to run
+# after starship has defined it. That is also why it cannot live in conf.d,
+# which fish sources *before* config.fish.
+mercury shell-integration fish | source

@@ -1,0 +1,20 @@
+#!/bin/sh
+# Merge the agent-tmux-status hooks into ~/.claude/settings.json.
+# Everything else in the file (model, plugins, herdr hooks...) stays machine-local.
+input=$(cat)
+[ -n "$input" ] || input='{}'
+printf '%s\n' "$input" | jq '
+  def ours: (.command // "") | test("agent-tmux-status");
+  def hook(state; matcher):
+    [{hooks: [{type: "command", timeout: 5,
+               command: ("bash \"$HOME/.local/bin/agent-tmux-status\" " + state + " claude")}]}
+     + (if matcher then {matcher: matcher} else {} end)];
+  .hooks = ((.hooks // {})
+    | map_values(map(.hooks |= map(select(ours | not))) | map(select(.hooks | length > 0)))
+    | with_entries(select(.value | length > 0)))
+  | .hooks.UserPromptSubmit += hook("working"; null)
+  | .hooks.Notification     += hook("waiting"; "permission_prompt|elicitation_dialog")
+  | .hooks.Stop             += hook("done"; null)
+  | .hooks.StopFailure      += hook("error"; null)
+  | .hooks.SessionEnd       += hook("reset"; null)
+'

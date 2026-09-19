@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Agent state for tmux tabs. Shared by Claude Code and Codex hooks.
+#
+#   agent-tmux-status <state> <agent>   from agent hooks (uses $TMUX_PANE, hook JSON on stdin)
+#   agent-tmux-status seen <window>     from tmux focus hooks
+#
+# States: … working   ! waiting (needs you)   ✓ done (unseen)
+#         ■ interrupted   ✗ error   no icon = idle (seen)
+#
+# Only window options are set here; ~/.tmux.conf renders the tab as
+# "<icon> <agent>: <topic>" and colours it by @agent. The topic is the title
+# the agent gives its own pane (kept live by a pane-title-changed hook),
+# falling back to the last prompt, then the directory name.
+#   @agent        state            @agent_icon   icon for the state
+#   @agent_kind   claude / codex   @agent_pane   pane the agent runs in
+#   @agent_title  raw pane title   @agent_prompt last prompt (first line)
+#   @agent_name   directory name
+
+set_state() { # <target> <state> <icon>
+  tmux set-window-option -t "$1" @agent "$2" \; set-window-option -t "$1" @agent_icon "$3" 2>/dev/null
+}
+
+if [ "$1" = seen ]; then
+  [ -n "$2" ] || exit 0
+  case "$(tmux show-options -wqv -t "$2" @agent)" in
+    done|interrupted|error) set_state "$2" idle "" ;;
+  esac
+  exit 0
+fi
+
+[ -n "$TMUX" ] && [ -n "$TMUX_PANE" ] || exit 0
+state=$1 kind=${2:-agent} pane=$TMUX_PANE
+
+if [ "$state" = reset ]; then
+  for opt in @agent @agent_icon @agent_kind @agent_pane @agent_title @agent_prompt @agent_name; do
+    tmux set-window-option -t "$pane" -u "$opt" 2>/dev/null
+  done
+  exit 0
+fi
+
+tmux set-window-option -t "$pane" @agent_kind "$kind" \; \
+     set-window-option -t "$pane" @agent_pane "$pane" \; \
+     set-window-option -t "$pane" @agent_name "$(basename "$PWD")" \; \
+     set-window-option -t "$pane" -F @agent_title '#{pane_title}' 2>/dev/null
+
+if [ "$state" = working ]; then
+  prompt=$(jq -r '.prompt // empty' 2>/dev/null | grep -m1 -v '^[[:space:]]*$' | sed 's/^[[:space:]]*//' | head -c 200)
+  [ -n "$prompt" ] && tmux set-window-option -t "$pane" @agent_prompt "$prompt" 2>/dev/null
+fi
+
+# A result that lands in the window you're looking at is already seen.
+focused() {
+  [ "$(tmux display-message -p -t "$pane" '#{&&:#{window_active},#{session_attached}}')" = 1 ]
+}
+
+case "$state" in
+  working)     set_state "$pane" working "…" ;;
+  waiting)     set_state "$pane" waiting "!" ;;
+  done)        if focused; then set_state "$pane" idle ""; else set_state "$pane" done "✓"; fi ;;
+  interrupted) if focused; then set_state "$pane" idle ""; else set_state "$pane" interrupted "■"; fi ;;
+  error)       set_state "$pane" error "✗" ;;
+esac
+exit 0
