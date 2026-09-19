@@ -13,6 +13,8 @@ printf '%s\n' "$input" | jq '
     | with_entries(select(.value | length > 0)))
   | .hooks.UserPromptSubmit  += hook("working")
   | .hooks.PermissionRequest += hook("waiting")
+  | .hooks.PreToolUse        += [hook("waiting")[0] + {matcher: "request_user_input"}]
+  | .hooks.PostToolUse       += hook("resume")
   | .hooks.Stop              += hook("done")
   | .hooks.Interrupt         += hook("interrupted")
   | .hooks.SessionEnd        += hook("reset")

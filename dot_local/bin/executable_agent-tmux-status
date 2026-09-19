@@ -1,53 +1,184 @@
 #!/usr/bin/env bash
-# Agent state for tmux tabs. Shared by Claude Code and Codex hooks.
+# Agent state and names for tmux tabs. Shared by Claude Code and Codex hooks.
+# Naming rules adapted from qu8n/herdr-automatic-rename.
 #
-#   agent-tmux-status <state> <agent>   from agent hooks (uses $TMUX_PANE, hook JSON on stdin)
+#   agent-tmux-status <state> <agent>   from agent hooks ($TMUX_PANE, hook JSON on stdin)
+#   agent-tmux-status resume <agent>    after every tool call: waiting -> working
+#   agent-tmux-status title <pane>      from tmux when an agent pane's title text changes
 #   agent-tmux-status seen <window>     from tmux focus hooks
+#   agent-tmux-status next <client>     jump that client to the agent that most needs you
 #
 # States: … working   ! waiting (needs you)   ✓ done (unseen)
 #         ■ interrupted   ✗ error   no icon = idle (seen)
 # Rings the bell on done, waiting and error only.
 #
 # Only window options are set here; ~/.tmux.conf renders the tab as
-# "<icon> <agent>: <topic>" and colours it by @agent. The topic is the title
-# the agent gives its own pane (kept live by a pane-title-changed hook),
-# falling back to the last prompt, then the directory name.
-#   @agent        state            @agent_icon   icon for the state
-#   @agent_kind   claude / codex   @agent_pane   pane the agent runs in
-#   @agent_title  raw pane title   @agent_prompt last prompt (first line)
-#   @agent_name   directory name
+# "<state icon> <agent icon> <context> › <task>" and colours it by @agent.
+#   @agent, @agent_icon      state and its icon
+#   @agent_kind, @agent_pane claude / codex, and the pane the agent runs in
+#   @agent_ctx               branch (unless trunk), else directory
+#   @agent_ctx_tab           its last segment (feat/billing -> billing) for narrow tabs
+#   @agent_task              what the agent is doing (see task below), cut to fit a tab
+#   @agent_task_full         the same, uncut, for the overview (prefix + a)
+#   @agent_since             when the state last changed, so "next" picks the oldest
+#   @agent_title_key         pane title minus its first token; tmux compares it
+#                            to spot real title changes, ignoring spinner frames
+#   @agent_prompt, @agent_transcript   fallbacks for an untitled session
+
+TASK_LEN=24   # budget for the task, cut at a word boundary
+CTX_LEN=12    # budget for the branch / directory
+TRUNKS='main master develop trunk'   # when the repo records no default branch
 
 set_state() { # <target> <state> <icon>
-  tmux set-window-option -t "$1" @agent "$2" \; set-window-option -t "$1" @agent_icon "$3" 2>/dev/null
+  tmux set-window-option -t "$1" @agent "$2" \; \
+       set-window-option -t "$1" @agent_icon "$3" \; \
+       set-window-option -t "$1" @agent_since "$(date +%s)" 2>/dev/null
 }
 
-if [ "$1" = seen ]; then
-  [ -n "$2" ] || exit 0
-  case "$(tmux show-options -wqv -t "$2" @agent)" in
-    done|interrupted|error) set_state "$2" idle "" ;;
-  esac
-  exit 0
-fi
+# Shorten a branch or directory to $CTX_LEN: an issue key wins outright,
+# otherwise keep the last path segment and cut at a separator.
+shorten() {
+  jq -rn --arg s "$1" --argjson n "$CTX_LEN" '
+    if ($s | length) <= $n then $s
+    elif ($s | test("(^|[^[:alnum:]])[A-Za-z]{2,6}-[0-9]{2,6}([^0-9]|$)"))
+    then $s | capture("(?<k>[A-Za-z]{2,6}-[0-9]{2,6})").k | ascii_upcase
+    else ($s | split("/") | last) as $b
+      | if ($b | length) <= $n then $b
+        else $b[:$n] as $c
+          | if ($b[$n:$n+1] | test("^[-_. ]")) then $c
+            else ($c | sub("[-_. ][^-_. ]*$"; "")) as $w
+              | if ($w | length) > 0 and $w != $c then $w else $c end end
+          | sub("^[-_. ]+"; "") | sub("[-_. ]+$"; "") end end'
+}
+
+# Where the agent is: its branch unless that is the trunk, else its directory.
+context() { # <dir>
+  local dir=$1 branch default
+  branch=$(git -C "$dir" symbolic-ref --short -q HEAD 2>/dev/null) ||
+    branch=$(git -C "$dir" rev-parse --short -q HEAD 2>/dev/null)
+  if [ -n "$branch" ]; then
+    default=$(git -C "$dir" symbolic-ref --short -q refs/remotes/origin/HEAD 2>/dev/null)
+    default=${default#origin/}
+    if [ -n "$default" ]; then
+      [ "$branch" != "$default" ] && { shorten "$branch"; return; }
+    else
+      case " $TRUNKS " in *" $branch "*) ;; *) shorten "$branch"; return ;; esac
+    fi
+  fi
+  [ "${dir%/}" = "${HOME%/}" ] && return
+  shorten "$(basename "$dir")"
+}
+
+# What the agent is doing: the title it gives its pane, then Claude's own
+# session title from the transcript, then the last prompt. A title is refused
+# when it says nothing: the agent naming itself, the directory, the host, a
+# bare number. jq's regex knows Unicode, so a leading spinner is stripped
+# without eating a first word in another script.
+task() { # <pane> <kind> <dir>
+  local pane=$1 kind=$2 dir=$3 title transcript t
+  title=$(tmux display-message -p -t "$pane" '#{pane_title}')
+  t=$(jq -rn --arg t "$title" --arg kind "$kind" --arg dir "$(basename "$dir")" \
+             --arg host "$(hostname)" '
+    def clean: sub(" [|] [^|]*$"; "") | sub("^[^\\p{L}\\p{N}]+"; "")
+               | gsub("\\s+"; " ") | sub(" $"; "");
+    ($t | clean) as $c | ($c | ascii_downcase) as $l
+    | if $c == "" or ($c | test("^[0-9]+$"))
+         or ([$kind, $kind + " code", "claude code", "codex", "openai codex",
+              ($dir | ascii_downcase), ($host | ascii_downcase),
+              ($host | split(".")[0] | ascii_downcase)] | index($l))
+      then empty else $c end' 2>/dev/null)
+  [ -n "$t" ] && { printf '%s' "$t"; return; }
+  transcript=$(tmux show-options -wqv -t "$pane" @agent_transcript)
+  if [ "$kind" = claude ] && [ -f "$transcript" ]; then
+    t=$(tail -c 262144 "$transcript" 2>/dev/null | jq -Rrn \
+      '[inputs | fromjson? // empty | select(.type == "ai-title") | .aiTitle | strings] | last // empty' 2>/dev/null)
+    [ -n "$t" ] && { printf '%s' "$t"; return; }
+  fi
+  tmux show-options -wqv -t "$pane" @agent_prompt
+}
+
+# Cut to $TASK_LEN at a word boundary when that keeps at least half.
+fit() {
+  jq -rn --arg s "$1" --argjson n "$TASK_LEN" '
+    if ($s | length) <= $n then $s
+    else $s[:$n - 1] as $c
+      | (if $s[$n - 1:$n] == " " then $c else $c | sub(" [^ ]*$"; "") end) as $w
+      | (if ($w | length) >= ($n / 2) then $w else $c end) + "…" end'
+}
+
+# Recompute the task for the agent window that owns <pane>.
+retitle() { # <pane>
+  local pane=$1 kind dir t
+  kind=$(tmux show-options -wqv -t "$pane" @agent_kind)
+  dir=$(tmux display-message -p -t "$pane" '#{pane_current_path}')
+  t=$(task "$pane" "$kind" "$dir")
+  tmux set-window-option -t "$pane" -F @agent_title_key '#{s/^[^ ]* //:pane_title}' \; \
+       set-window-option -t "$pane" @agent_task_full "$t" \; \
+       set-window-option -t "$pane" @agent_task "$(fit "$t")" 2>/dev/null
+}
+
+# The live agent that most needs you: waiting or error first, then done, oldest
+# first within each. @agent_on (tmux.conf) drops agents whose pane is back at a shell.
+next() { # <client>
+  local target
+  target=$(tmux list-windows -a -F '#{E:@agent_on} #{@agent} #{@agent_since} #{window_id}' |
+    awk '$1 == 1 { r = ($2 == "waiting" || $2 == "error") ? 0 : ($2 == "done" ? 1 : 9)
+                   if (r < 9) print r, $3, $4 }' | sort -n -k1,1 -k2,2 | awk 'NR == 1 { print $3 }')
+  if [ -n "$target" ]; then
+    tmux switch-client -c "$1" -t "$target"
+  else
+    tmux display-message -c "$1" "No agent needs you"
+  fi
+}
+
+case $1 in
+  seen)
+    [ -n "$2" ] || exit 0
+    case "$(tmux show-options -wqv -t "$2" @agent)" in
+      done|interrupted|error) set_state "$2" idle "" ;;
+    esac
+    exit 0 ;;
+  title)
+    [ -n "$2" ] && retitle "$2"
+    exit 0 ;;
+  next)
+    next "$2"
+    exit 0 ;;
+esac
 
 [ -n "$TMUX" ] && [ -n "$TMUX_PANE" ] || exit 0
 state=$1 kind=${2:-agent} pane=$TMUX_PANE
+current=$(tmux show-options -wqv -t "$pane" @agent)
+
+# Fires after every tool call, so keep it to one tmux read when nothing changes.
+if [ "$state" = resume ]; then
+  [ "$current" = waiting ] && tmux set-window-option -t "$pane" @agent working \; \
+                                   set-window-option -t "$pane" @agent_icon "…" 2>/dev/null
+  exit 0
+fi
 
 if [ "$state" = reset ]; then
-  for opt in @agent @agent_icon @agent_kind @agent_pane @agent_title @agent_prompt @agent_name; do
+  for opt in @agent @agent_icon @agent_kind @agent_pane @agent_ctx @agent_ctx_tab @agent_task \
+             @agent_task_full @agent_since @agent_title_key @agent_prompt @agent_transcript; do
     tmux set-window-option -t "$pane" -u "$opt" 2>/dev/null
   done
   exit 0
 fi
 
-tmux set-window-option -t "$pane" @agent_kind "$kind" \; \
-     set-window-option -t "$pane" @agent_pane "$pane" \; \
-     set-window-option -t "$pane" @agent_name "$(basename "$PWD")" \; \
-     set-window-option -t "$pane" -F @agent_title '#{pane_title}' 2>/dev/null
-
+input=$(cat)
 if [ "$state" = working ]; then
-  prompt=$(jq -r '.prompt // empty' 2>/dev/null | grep -m1 -v '^[[:space:]]*$' | sed 's/^[[:space:]]*//' | head -c 200)
+  prompt=$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null |
+    grep -m1 -v '^[[:space:]]*$' | sed 's/^[[:space:]]*//' | head -c 200)
   [ -n "$prompt" ] && tmux set-window-option -t "$pane" @agent_prompt "$prompt" 2>/dev/null
 fi
+ctx=$(context "$PWD")
+tmux set-window-option -t "$pane" @agent_kind "$kind" \; \
+     set-window-option -t "$pane" @agent_pane "$pane" \; \
+     set-window-option -t "$pane" @agent_transcript \
+       "$(printf '%s' "$input" | jq -r '.transcript_path // empty' 2>/dev/null)" \; \
+     set-window-option -t "$pane" @agent_ctx "$ctx" \; \
+     set-window-option -t "$pane" @agent_ctx_tab "${ctx##*/}" 2>/dev/null
+retitle "$pane"
 
 # The only source of bells for agent windows (tmux activity alerts and the
 # agents' own notifications are off): ring on done / needs you / error.
@@ -63,7 +194,7 @@ focused() {
 
 case "$state" in
   working)     set_state "$pane" working "…" ;;
-  waiting)     set_state "$pane" waiting "!"; bell ;;
+  waiting)     set_state "$pane" waiting "!"; [ "$current" = waiting ] || bell ;;
   done)        if focused; then set_state "$pane" idle ""; else set_state "$pane" done "✓"; fi; bell ;;
   interrupted) if focused; then set_state "$pane" idle ""; else set_state "$pane" interrupted "■"; fi ;;
   error)       set_state "$pane" error "✗"; bell ;;

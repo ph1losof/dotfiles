@@ -12,8 +12,12 @@ printf '%s\n' "$input" | jq '
   .hooks = ((.hooks // {})
     | map_values(map(.hooks |= map(select(ours | not))) | map(select(.hooks | length > 0)))
     | with_entries(select(.value | length > 0)))
-  | .hooks.UserPromptSubmit += hook("working"; null)
-  | .hooks.Notification     += hook("waiting"; "permission_prompt|elicitation_dialog")
+  # async: naming work (git, jq) must not delay sending the prompt
+  | .hooks.UserPromptSubmit += [hook("working"; null)[0] | .hooks[0].async = true]
+  | .hooks.PermissionRequest += hook("waiting"; null)
+  | .hooks.PreToolUse       += hook("waiting"; "AskUserQuestion|ExitPlanMode")
+  | .hooks.PostToolUse      += hook("resume"; null)
+  | .hooks.Notification     += hook("waiting"; "permission_prompt|elicitation_dialog|elicitation_url_dialog")
   | .hooks.Stop             += hook("done"; null)
   | .hooks.StopFailure      += hook("error"; null)
   | .hooks.SessionEnd       += hook("reset"; null)
