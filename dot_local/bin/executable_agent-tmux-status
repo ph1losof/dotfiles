@@ -6,6 +6,7 @@
 #
 # States: … working   ! waiting (needs you)   ✓ done (unseen)
 #         ■ interrupted   ✗ error   no icon = idle (seen)
+# Rings the bell on done, waiting and error only.
 #
 # Only window options are set here; ~/.tmux.conf renders the tab as
 # "<icon> <agent>: <topic>" and colours it by @agent. The topic is the title
@@ -48,6 +49,13 @@ if [ "$state" = working ]; then
   [ -n "$prompt" ] && tmux set-window-option -t "$pane" @agent_prompt "$prompt" 2>/dev/null
 fi
 
+# The only source of bells for agent windows (tmux activity alerts and the
+# agents' own notifications are off): ring on done / needs you / error.
+bell() {
+  local tty
+  tty=$(tmux display-message -p -t "$pane" '#{pane_tty}') && [ -w "$tty" ] && printf '\a' > "$tty"
+}
+
 # A result that lands in the window you're looking at is already seen.
 focused() {
   [ "$(tmux display-message -p -t "$pane" '#{&&:#{window_active},#{session_attached}}')" = 1 ]
@@ -55,9 +63,9 @@ focused() {
 
 case "$state" in
   working)     set_state "$pane" working "…" ;;
-  waiting)     set_state "$pane" waiting "!" ;;
-  done)        if focused; then set_state "$pane" idle ""; else set_state "$pane" done "✓"; fi ;;
+  waiting)     set_state "$pane" waiting "!"; bell ;;
+  done)        if focused; then set_state "$pane" idle ""; else set_state "$pane" done "✓"; fi; bell ;;
   interrupted) if focused; then set_state "$pane" idle ""; else set_state "$pane" interrupted "■"; fi ;;
-  error)       set_state "$pane" error "✗" ;;
+  error)       set_state "$pane" error "✗"; bell ;;
 esac
 exit 0

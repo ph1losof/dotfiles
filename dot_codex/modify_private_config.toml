@@ -1,0 +1,15 @@
+#!/bin/sh
+# Ensure [tui] notifications = false in ~/.codex/config.toml; the rest of the file
+# (auth tokens, trust state, projects) stays machine-local and out of the repo.
+# agent-tmux-status is the single bell source; Codex's own alerts would double it.
+input=$(cat)
+if printf '%s\n' "$input" | grep -q '^\[tui\][[:space:]]*$'; then
+  printf '%s\n' "$input" | awk '
+    /^\[/ { if (intui && !done) { print "notifications = false"; done=1 } intui = ($0 ~ /^\[tui\][[:space:]]*$/) }
+    intui && /^notifications[[:space:]]*=/ { if (!done) { print "notifications = false"; done=1 } next }
+    { print }
+    END { if (intui && !done) print "notifications = false" }'
+else
+  printf '%s\n' "$input"
+  printf '\n[tui]\nnotifications = false\n'
+fi
