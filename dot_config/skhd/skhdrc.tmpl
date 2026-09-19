@@ -5,7 +5,9 @@ rcmd - f : open -a Finder
 rcmd - n : open -a /Applications/Notion.app
 rcmd - c : open -a /Applications/Notion Calendar.app
 rcmd - g : open -a /Applications/Figma.app
+{{- /* Machine-local bindings: ~/.config/skhd/skhdrc.local is not synced */}}
+{{- $local := joinPath .chezmoi.homeDir ".config/skhd/skhdrc.local" }}
+{{- if stat $local }}
 
-# --- Osaurus bindings ---
-# Ask Osaurus → opens the active agent chat window and waits for the reply
-rcmd - o : execute osascript -e 'tell application "com.sambasoft.osaurus" to do script "Ask Osaurus"'
+{{ output "cat" $local | trim }}
+{{- end }}
