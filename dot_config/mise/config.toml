@@ -19,6 +19,7 @@ java = "26.0.1"
 ruby = "4.0.5"
 terraform = "1.15.6"
 aube = "1.18.2"
+"npm:@openai/codex" = "latest"
 # postgres removed: it was never installed and `postgres@latest` forced a
 # network version-list fetch on every prompt (~325ms). Re-add a concrete
 # version if you actually install it.
