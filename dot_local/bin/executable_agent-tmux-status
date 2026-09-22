@@ -1,72 +1,68 @@
 #!/usr/bin/env bash
-# Agent state and names for tmux tabs. Shared by Claude Code and Codex hooks.
+# Coding-agent state for tmux tabs, fed by Claude Code and Codex hooks.
 # Naming rules adapted from qu8n/herdr-automatic-rename.
 #
-#   agent-tmux-status <state> <agent>   from agent hooks ($TMUX_PANE, hook JSON on stdin)
-#   agent-tmux-status resume <agent>    after every tool call: waiting -> working
-#   agent-tmux-status title <pane>      from tmux when an agent pane's title text changes
-#   agent-tmux-status seen <window>     from tmux focus hooks
-#   agent-tmux-status next <client>     jump that client to the agent that most needs you
+#   agent-tmux-status hook <agent>     every agent hook; the event comes from the hook JSON
+#   agent-tmux-status title <pane>     tmux: an agent pane's title text changed
+#   agent-tmux-status seen <window>    tmux: you looked at a window
+#   agent-tmux-status next <client>    tmux: jump to the agent that most needs you
 #
-# States: … working   ! waiting (needs you)   ✓ done (unseen)
-#         ■ interrupted   ✗ error   no icon = idle (seen)
-# Rings the bell on done, waiting and error only.
+# The tab shows one of four states, as colour (see ~/.tmux.conf):
+#   working  yellow  the main turn runs, or background subagents do
+#   waiting  red     blocked on you: permission, question, plan approval, error
+#   done     green   finished and you have not looked yet
+#   idle     grey    finished and seen, or interrupted by you
+# It is derived from three inputs, so subagents cannot fake a "done" or leave a
+# stale "working" behind:
+#   @agent_turn  the main agent's own turn: working / done / idle / error
+#   @agent_subs  ids of subagents still running (SubagentStart .. SubagentStop)
+#   @agent_wait  who is blocked on you: "main" and/or subagent ids; each clears
+#                when that agent's tool result arrives, or when it stops
+# The bell rings when a tab turns red or green, once.
 #
-# Only window options are set here; ~/.tmux.conf renders the tab as
-# "<state icon> <agent icon> <context> › <task>" and colours it by @agent.
-#   @agent, @agent_icon      state and its icon
-#   @agent_kind, @agent_pane claude / codex, and the pane the agent runs in
-#   @agent_ctx               branch (unless trunk), else directory
-#   @agent_ctx_tab           its last segment (feat/billing -> billing) for narrow tabs
-#   @agent_task              what the agent is doing (see task below), cut to fit a tab
-#   @agent_task_full         the same, uncut, for the overview (prefix + a)
-#   @agent_since             when the state last changed, so "next" picks the oldest
-#   @agent_title_key         pane title minus its first token; tmux compares it
-#                            to spot real title changes, ignoring spinner frames
-#   @agent_prompt, @agent_transcript   fallbacks for an untitled session
+# Window options written here, read by ~/.tmux.conf:
+#   @agent            displayed state        @agent_icon   its icon, for the overview
+#   @agent_kind       claude / codex         @agent_pane   the pane the agent runs in
+#   @agent_task       what it is doing, cut to fit a tab; @agent_task_full uncut
+#   @agent_branch     branch unless it is the trunk (overview only)
+#   @agent_since      when @agent last changed, so "next" picks the oldest
+#   @agent_title_key  pane title minus its first token; tmux compares it to
+#                     spot real title changes, ignoring spinner frames
+#   @agent_prompt, @agent_transcript   task fallbacks for an untitled session
 
-TASK_LEN=24   # budget for the task, cut at a word boundary
-CTX_LEN=12    # budget for the branch / directory
+TASK_LEN=28   # task budget, cut at a word boundary; tmux trims further to fit
+BRANCH_LEN=16
 TRUNKS='main master develop trunk'   # when the repo records no default branch
+OPTS='@agent @agent_icon @agent_turn @agent_subs @agent_wait @agent_kind @agent_pane @agent_task
+      @agent_task_full @agent_branch @agent_since @agent_title_key @agent_prompt @agent_transcript'
 
-set_state() { # <target> <state> <icon>
-  tmux set-window-option -t "$1" @agent "$2" \; \
-       set-window-option -t "$1" @agent_icon "$3" \; \
-       set-window-option -t "$1" @agent_since "$(date +%s)" 2>/dev/null
-}
+opt() { tmux show-options -wqv -t "$1" "$2"; }
 
-# Shorten a branch or directory to $CTX_LEN: an issue key wins outright,
-# otherwise keep the last path segment and cut at a separator.
+# ---- naming --------------------------------------------------------------
+
+# Shorten a branch: an issue key wins outright, else the last path segment,
+# cut at a separator.
 shorten() {
-  jq -rn --arg s "$1" --argjson n "$CTX_LEN" '
-    if ($s | length) <= $n then $s
-    elif ($s | test("(^|[^[:alnum:]])[A-Za-z]{2,6}-[0-9]{2,6}([^0-9]|$)"))
+  jq -rn --arg s "$1" --argjson n "$BRANCH_LEN" '
+    if ($s | test("(^|[^[:alnum:]])[A-Za-z]{2,6}-[0-9]{2,6}([^0-9]|$)"))
     then $s | capture("(?<k>[A-Za-z]{2,6}-[0-9]{2,6})").k | ascii_upcase
     else ($s | split("/") | last) as $b
       | if ($b | length) <= $n then $b
-        else $b[:$n] as $c
-          | if ($b[$n:$n+1] | test("^[-_. ]")) then $c
-            else ($c | sub("[-_. ][^-_. ]*$"; "")) as $w
-              | if ($w | length) > 0 and $w != $c then $w else $c end end
-          | sub("^[-_. ]+"; "") | sub("[-_. ]+$"; "") end end'
+        else $b[:$n] as $c | ($c | sub("[-_.][^-_.]*$"; "")) as $w
+          | if ($w | length) > 0 and $w != $c then $w else $c end end end'
 }
 
-# Where the agent is: its branch unless that is the trunk, else its directory.
-context() { # <dir>
-  local dir=$1 branch default
-  branch=$(git -C "$dir" symbolic-ref --short -q HEAD 2>/dev/null) ||
-    branch=$(git -C "$dir" rev-parse --short -q HEAD 2>/dev/null)
-  if [ -n "$branch" ]; then
-    default=$(git -C "$dir" symbolic-ref --short -q refs/remotes/origin/HEAD 2>/dev/null)
-    default=${default#origin/}
-    if [ -n "$default" ]; then
-      [ "$branch" != "$default" ] && { shorten "$branch"; return; }
-    else
-      case " $TRUNKS " in *" $branch "*) ;; *) shorten "$branch"; return ;; esac
-    fi
+# The branch, unless it is the trunk (the repo's default, else a common name).
+branch() { # <dir>
+  local dir=$1 b default
+  b=$(git -C "$dir" symbolic-ref --short -q HEAD 2>/dev/null) ||
+    b=$(git -C "$dir" rev-parse --short -q HEAD 2>/dev/null) || return
+  default=$(git -C "$dir" symbolic-ref --short -q refs/remotes/origin/HEAD 2>/dev/null)
+  default=${default#origin/}
+  if [ -n "$default" ]; then [ "$b" = "$default" ] && return
+  else case " $TRUNKS " in *" $b "*) return ;; esac
   fi
-  [ "${dir%/}" = "${HOME%/}" ] && return
-  shorten "$(basename "$dir")"
+  shorten "$b"
 }
 
 # What the agent is doing: the title it gives its pane, then Claude's own
@@ -75,26 +71,25 @@ context() { # <dir>
 # bare number. jq's regex knows Unicode, so a leading spinner is stripped
 # without eating a first word in another script.
 task() { # <pane> <kind> <dir>
-  local pane=$1 kind=$2 dir=$3 title transcript t
-  title=$(tmux display-message -p -t "$pane" '#{pane_title}')
-  t=$(jq -rn --arg t "$title" --arg kind "$kind" --arg dir "$(basename "$dir")" \
-             --arg host "$(hostname)" '
-    def clean: sub(" [|] [^|]*$"; "") | sub("^[^\\p{L}\\p{N}]+"; "")
-               | gsub("\\s+"; " ") | sub(" $"; "");
-    ($t | clean) as $c | ($c | ascii_downcase) as $l
+  local pane=$1 kind=$2 dir=$3 t transcript
+  t=$(jq -rn --arg t "$(tmux display-message -p -t "$pane" '#{pane_title}')" \
+             --arg kind "$kind" --arg dir "$(basename "$dir")" --arg host "$(hostname)" '
+    ($t | sub(" [|] [^|]*$"; "") | sub("^[^\\p{L}\\p{N}]+"; "")
+        | gsub("\\s+"; " ") | sub(" $"; "")) as $c
+    | ($c | ascii_downcase) as $l
     | if $c == "" or ($c | test("^[0-9]+$"))
          or ([$kind, $kind + " code", "claude code", "codex", "openai codex",
               ($dir | ascii_downcase), ($host | ascii_downcase),
               ($host | split(".")[0] | ascii_downcase)] | index($l))
       then empty else $c end' 2>/dev/null)
   [ -n "$t" ] && { printf '%s' "$t"; return; }
-  transcript=$(tmux show-options -wqv -t "$pane" @agent_transcript)
+  transcript=$(opt "$pane" @agent_transcript)
   if [ "$kind" = claude ] && [ -f "$transcript" ]; then
     t=$(tail -c 262144 "$transcript" 2>/dev/null | jq -Rrn \
       '[inputs | fromjson? // empty | select(.type == "ai-title") | .aiTitle | strings] | last // empty' 2>/dev/null)
     [ -n "$t" ] && { printf '%s' "$t"; return; }
   fi
-  tmux show-options -wqv -t "$pane" @agent_prompt
+  opt "$pane" @agent_prompt
 }
 
 # Cut to $TASK_LEN at a word boundary when that keeps at least half.
@@ -106,97 +101,169 @@ fit() {
       | (if ($w | length) >= ($n / 2) then $w else $c end) + "…" end'
 }
 
-# Recompute the task for the agent window that owns <pane>.
 retitle() { # <pane>
-  local pane=$1 kind dir t
-  kind=$(tmux show-options -wqv -t "$pane" @agent_kind)
-  dir=$(tmux display-message -p -t "$pane" '#{pane_current_path}')
-  t=$(task "$pane" "$kind" "$dir")
+  local pane=$1 t
+  t=$(task "$pane" "$(opt "$pane" @agent_kind)" "$(tmux display-message -p -t "$pane" '#{pane_current_path}')")
   tmux set-window-option -t "$pane" -F @agent_title_key '#{s/^[^ ]* //:pane_title}' \; \
        set-window-option -t "$pane" @agent_task_full "$t" \; \
        set-window-option -t "$pane" @agent_task "$(fit "$t")" 2>/dev/null
 }
 
-# The live agent that most needs you: waiting or error first, then done, oldest
-# first within each. @agent_on (tmux.conf) drops agents whose pane is back at a shell.
-next() { # <client>
-  local target
-  target=$(tmux list-windows -a -F '#{E:@agent_on} #{@agent} #{@agent_since} #{window_id}' |
-    awk '$1 == 1 { r = ($2 == "waiting" || $2 == "error") ? 0 : ($2 == "done" ? 1 : 9)
-                   if (r < 9) print r, $3, $4 }' | sort -n -k1,1 -k2,2 | awk 'NR == 1 { print $3 }')
-  if [ -n "$target" ]; then
-    tmux switch-client -c "$1" -t "$target"
-  else
-    tmux display-message -c "$1" "No agent needs you"
+# ---- state ---------------------------------------------------------------
+
+# Hooks can run concurrently (parallel subagents, async hooks): serialise the
+# read-modify-write of one window's state. A lock older than ~1s is stale.
+lock() { # <window id>
+  LOCK="${TMPDIR:-/tmp}/agent-tmux-status.${1#@}.lock"
+  local i=0
+  until mkdir "$LOCK" 2>/dev/null; do
+    i=$((i + 1)); [ $i -ge 100 ] && { rm -rf "$LOCK"; i=0; }
+    sleep 0.01
+  done
+  trap 'rmdir "$LOCK" 2>/dev/null' EXIT
+}
+
+# Derive the displayed state and store it with its inputs; ring when the tab
+# newly turns red or green (unless $QUIET).
+show() { # <pane> <turn> <subs> <wait>
+  local pane=$1 turn=$2 subs=$3 wait=$4 old new icon
+  if [ -n "${wait// /}" ] || [ "$turn" = error ]; then new=waiting
+  elif [ "$turn" = working ] || [ -n "${subs// /}" ]; then new=working
+  else new=${turn:-idle}
+  fi
+  case $new in working) icon="…" ;; waiting) icon="!" ;; done) icon="✓" ;; *) icon="" ;; esac
+  old=$(opt "$pane" @agent)
+  tmux set-window-option -t "$pane" @agent_turn "$turn" \; \
+       set-window-option -t "$pane" @agent_subs "$subs" \; \
+       set-window-option -t "$pane" @agent_wait "$wait" \; \
+       set-window-option -t "$pane" @agent "$new" \; \
+       set-window-option -t "$pane" @agent_icon "$icon" 2>/dev/null
+  if [ "$new" != "$old" ]; then
+    tmux set-window-option -t "$pane" @agent_since "$(date +%s)" 2>/dev/null
+    case $new in waiting|done) [ -n "$QUIET" ] || bell "$pane" ;; esac
   fi
 }
 
+# Word-set helpers for @agent_subs / @agent_wait.
+# Named ids are a set; "?" (an event without an id) is counted, one per start.
+add() {
+  case " $1 " in *" $2 "*) [ "$2" != "?" ] && { printf '%s' "$1"; return; } ;; esac
+  printf '%s' "${1:+$1 }$2"
+}
+del() { # <set> <word>; drops one occurrence
+  local out="" w done=""
+  for w in $1; do
+    if [ -z "$done" ] && [ "$w" = "$2" ]; then done=1; else out="${out:+$out }$w"; fi
+  done
+  printf '%s' "$out"
+}
+
+bell() { # <pane>; through the pane's tty, so tmux flags that window
+  local tty
+  tty=$(tmux display-message -p -t "$1" '#{pane_tty}') && [ -w "$tty" ] && printf '\a' > "$tty"
+}
+
+# A turn that ends in the window you are looking at is already seen.
+focused() { # <pane>
+  [ "$(tmux display-message -p -t "$1" '#{&&:#{window_active},#{session_attached}}')" = 1 ]
+}
+
+hook() { # <kind>; hook JSON on stdin
+  local kind=$1 pane=$TMUX_PANE input event tool agent_id interrupt turn subs wait who
+  [ -n "$TMUX" ] && [ -n "$pane" ] || return 0
+  input=$(cat)
+  # \037 separates fields: with a tab, bash would merge empty fields and shift the rest.
+  IFS=$'\037' read -r event tool agent_id interrupt < <(printf '%s' "$input" | jq -r '[
+      (.hook_event_name // "" | ascii_downcase | gsub("_"; "")),
+      (.tool_name // ""), (.agent_id // ""), (.is_interrupt // false | tostring)
+    ] | join("\u001f")' 2>/dev/null)
+  [ -n "$event" ] || return 0
+  who=${agent_id:-main}
+
+  lock "$(tmux display-message -p -t "$pane" '#{window_id}')"
+  if [ "$event" = sessionend ] || [ "$event" = sessionstart ]; then
+    for o in $OPTS; do tmux set-window-option -t "$pane" -u "$o" 2>/dev/null; done
+    [ "$event" = sessionend ] && return 0
+  fi
+  turn=$(opt "$pane" @agent_turn) subs=$(opt "$pane" @agent_subs) wait=$(opt "$pane" @agent_wait)
+
+  case $event in
+    sessionstart)
+      tmux set-window-option -t "$pane" @agent_kind "$kind" \; \
+           set-window-option -t "$pane" @agent_pane "$pane" 2>/dev/null
+      QUIET=1 show "$pane" idle "" "" ;;
+    userpromptsubmit)
+      local prompt
+      prompt=$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null |
+        grep -m1 -v '^[[:space:]]*$' | sed 's/^[[:space:]]*//' | head -c 200)
+      tmux set-window-option -t "$pane" @agent_kind "$kind" \; \
+           set-window-option -t "$pane" @agent_pane "$pane" \; \
+           set-window-option -t "$pane" @agent_prompt "$prompt" \; \
+           set-window-option -t "$pane" @agent_transcript \
+             "$(printf '%s' "$input" | jq -r '.transcript_path // empty' 2>/dev/null)" \; \
+           set-window-option -t "$pane" @agent_branch "$(branch "$PWD")" 2>/dev/null
+      retitle "$pane"
+      show "$pane" working "$subs" "$(del "$wait" main)" ;;
+    pretooluse)
+      case $tool in
+        AskUserQuestion|ExitPlanMode|request_user_input)
+          show "$pane" "$turn" "$subs" "$(add "$wait" "$who")" ;;
+        # The main agent at work after its turn ended: Claude resuming on its
+        # own, e.g. when a background subagent reports back. No prompt fires.
+        *) if [ -z "$agent_id" ]; then
+             case $turn in done|idle|"") show "$pane" working "$subs" "$wait" ;; esac
+           fi ;;
+      esac ;;
+    permissionrequest)
+      show "$pane" "$turn" "$subs" "$(add "$wait" "$who")" ;;
+    notification)
+      # Mostly a late repeat of a PermissionRequest (it has no agent_id to
+      # match it); it counts only when nothing waits yet, e.g. an MCP form.
+      [ -z "$wait" ] && show "$pane" "$turn" "$subs" main ;;
+    posttooluse|posttoolusefailure)
+      if [ "$interrupt" = true ] && [ -z "$agent_id" ]; then
+        show "$pane" idle "$subs" "$(del "$wait" main)"   # you pressed Esc mid-tool
+      else
+        case " $wait " in *" $who "*) show "$pane" "$turn" "$subs" "$(del "$wait" "$who")" ;; esac
+      fi ;;
+    subagentstart)
+      show "$pane" "$turn" "$(add "$subs" "${agent_id:-?}")" "$wait" ;;
+    subagentstop)
+      # When the last subagent ends after the main turn, the tab turns green
+      # quietly: Claude usually resumes to report the result, and that turn's
+      # Stop rings instead.
+      QUIET=1 show "$pane" "$turn" "$(del "$subs" "${agent_id:-?}")" "$(del "$wait" "${agent_id:-?}")" ;;
+    stop)
+      tmux set-window-option -t "$pane" @agent_branch "$(branch "$PWD")" 2>/dev/null
+      retitle "$pane"
+      if focused "$pane"; then turn=idle; else turn=done; fi
+      show "$pane" "$turn" "$subs" "$(del "$wait" main)" ;;
+    stopfailure)
+      show "$pane" error "$subs" "$wait" ;;
+    interrupt)
+      show "$pane" idle "$subs" "$(del "$wait" main)" ;;
+  esac
+}
+
+# ---- entry points --------------------------------------------------------
+
 case $1 in
+  hook)
+    hook "${2:-agent}" ;;
+  title)
+    [ -n "$2" ] && retitle "$2" ;;
   seen)
     [ -n "$2" ] || exit 0
-    case "$(tmux show-options -wqv -t "$2" @agent)" in
-      done|interrupted|error) set_state "$2" idle "" ;;
-    esac
-    exit 0 ;;
-  title)
-    [ -n "$2" ] && retitle "$2"
-    exit 0 ;;
+    case "$(opt "$2" @agent)" in
+      done) lock "$(tmux display-message -p -t "$2" '#{window_id}')"
+            show "$2" idle "$(opt "$2" @agent_subs)" "$(opt "$2" @agent_wait)" ;;
+    esac ;;
   next)
-    next "$2"
-    exit 0 ;;
-esac
-
-[ -n "$TMUX" ] && [ -n "$TMUX_PANE" ] || exit 0
-state=$1 kind=${2:-agent} pane=$TMUX_PANE
-current=$(tmux show-options -wqv -t "$pane" @agent)
-
-# Fires after every tool call, so keep it to one tmux read when nothing changes.
-if [ "$state" = resume ]; then
-  [ "$current" = waiting ] && tmux set-window-option -t "$pane" @agent working \; \
-                                   set-window-option -t "$pane" @agent_icon "…" 2>/dev/null
-  exit 0
-fi
-
-if [ "$state" = reset ]; then
-  for opt in @agent @agent_icon @agent_kind @agent_pane @agent_ctx @agent_ctx_tab @agent_task \
-             @agent_task_full @agent_since @agent_title_key @agent_prompt @agent_transcript; do
-    tmux set-window-option -t "$pane" -u "$opt" 2>/dev/null
-  done
-  exit 0
-fi
-
-input=$(cat)
-if [ "$state" = working ]; then
-  prompt=$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null |
-    grep -m1 -v '^[[:space:]]*$' | sed 's/^[[:space:]]*//' | head -c 200)
-  [ -n "$prompt" ] && tmux set-window-option -t "$pane" @agent_prompt "$prompt" 2>/dev/null
-fi
-ctx=$(context "$PWD")
-tmux set-window-option -t "$pane" @agent_kind "$kind" \; \
-     set-window-option -t "$pane" @agent_pane "$pane" \; \
-     set-window-option -t "$pane" @agent_transcript \
-       "$(printf '%s' "$input" | jq -r '.transcript_path // empty' 2>/dev/null)" \; \
-     set-window-option -t "$pane" @agent_ctx "$ctx" \; \
-     set-window-option -t "$pane" @agent_ctx_tab "${ctx##*/}" 2>/dev/null
-retitle "$pane"
-
-# The only source of bells for agent windows (tmux activity alerts and the
-# agents' own notifications are off): ring on done / needs you / error.
-bell() {
-  local tty
-  tty=$(tmux display-message -p -t "$pane" '#{pane_tty}') && [ -w "$tty" ] && printf '\a' > "$tty"
-}
-
-# A result that lands in the window you're looking at is already seen.
-focused() {
-  [ "$(tmux display-message -p -t "$pane" '#{&&:#{window_active},#{session_attached}}')" = 1 ]
-}
-
-case "$state" in
-  working)     set_state "$pane" working "…" ;;
-  waiting)     set_state "$pane" waiting "!"; [ "$current" = waiting ] || bell ;;
-  done)        if focused; then set_state "$pane" idle ""; else set_state "$pane" done "✓"; fi; bell ;;
-  interrupted) if focused; then set_state "$pane" idle ""; else set_state "$pane" interrupted "■"; fi ;;
-  error)       set_state "$pane" error "✗"; bell ;;
+    # Live agents only (@agent_on in tmux.conf): red first, then green, oldest first.
+    target=$(tmux list-windows -a -F '#{E:@agent_on} #{@agent} #{@agent_since} #{window_id}' |
+      awk '$1 == 1 && ($2 == "waiting" || $2 == "done") { print ($2 == "waiting" ? 0 : 1), $3, $4 }' |
+      sort -n -k1,1 -k2,2 | awk 'NR == 1 { print $3 }')
+    if [ -n "$target" ]; then tmux switch-client -c "$2" -t "$target"
+    else tmux display-message -c "$2" "No agent needs you"; fi ;;
 esac
 exit 0

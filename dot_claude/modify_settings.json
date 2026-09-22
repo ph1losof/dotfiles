@@ -1,26 +1,33 @@
 #!/bin/sh
 # Merge the agent-tmux-status hooks into ~/.claude/settings.json.
 # Everything else in the file (model, plugins, herdr hooks...) stays machine-local.
+# Every event calls the same entry point; the script reads the event from the hook JSON.
 input=$(cat)
 [ -n "$input" ] || input='{}'
 printf '%s\n' "$input" | jq '
   def ours: (.command // "") | test("agent-tmux-status");
-  def hook(state; matcher):
+  def hook(matcher; async):
     [{hooks: [{type: "command", timeout: 5,
-               command: ("bash \"$HOME/.local/bin/agent-tmux-status\" " + state + " claude")}]}
+               command: "bash \"$HOME/.local/bin/agent-tmux-status\" hook claude"}
+              + (if async then {async: true} else {} end)]}
      + (if matcher then {matcher: matcher} else {} end)];
   .hooks = ((.hooks // {})
     | map_values(map(.hooks |= map(select(ours | not))) | map(select(.hooks | length > 0)))
     | with_entries(select(.value | length > 0)))
-  # async: naming work (git, jq) must not delay sending the prompt
-  | .hooks.UserPromptSubmit += [hook("working"; null)[0] | .hooks[0].async = true]
-  | .hooks.PermissionRequest += hook("waiting"; null)
-  | .hooks.PreToolUse       += hook("waiting"; "AskUserQuestion|ExitPlanMode")
-  | .hooks.PostToolUse      += hook("resume"; null)
-  | .hooks.Notification     += hook("waiting"; "permission_prompt|elicitation_dialog|elicitation_url_dialog")
-  | .hooks.Stop             += hook("done"; null)
-  | .hooks.StopFailure      += hook("error"; null)
-  | .hooks.SessionEnd       += hook("reset"; null)
+  # async: frequent events (every prompt and tool call) must not wait on git / jq
+  | .hooks.UserPromptSubmit   += hook(null; true)
+  | .hooks.PreToolUse         += hook(null; true)
+  | .hooks.PostToolUse        += hook(null; true)
+  | .hooks.PostToolUseFailure += hook(null; true)
+  # sync: their order matters (a subagent stop must never overtake its start)
+  | .hooks.PermissionRequest  += hook(null; false)
+  | .hooks.Notification       += hook("permission_prompt|elicitation_dialog|elicitation_url_dialog"; false)
+  | .hooks.SubagentStart      += hook(null; false)
+  | .hooks.SubagentStop       += hook(null; false)
+  | .hooks.Stop               += hook(null; false)
+  | .hooks.StopFailure        += hook(null; false)
+  | .hooks.SessionStart       += hook(null; false)
+  | .hooks.SessionEnd         += hook(null; false)
   # agent-tmux-status is the single bell source; native Claude alerts would double it
   | .preferredNotifChannel = "notifications_disabled"
 '

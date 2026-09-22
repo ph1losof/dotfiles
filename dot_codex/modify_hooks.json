@@ -1,21 +1,17 @@
 #!/bin/sh
 # Merge the agent-tmux-status hooks into ~/.codex/hooks.json.
 # Other hooks (herdr...) stay machine-local. Codex asks to trust changed hooks once.
+# Every event calls the same entry point; the script reads the event from the hook JSON.
 input=$(cat)
 [ -n "$input" ] || input='{}'
 printf '%s\n' "$input" | jq '
   def ours: (.command // "") | test("agent-tmux-status");
-  def hook(state):
-    [{hooks: [{type: "command", timeout: 3,
-               command: ("bash \"$HOME/.local/bin/agent-tmux-status\" " + state + " codex")}]}];
+  def hook: [{hooks: [{type: "command", timeout: 3,
+                       command: "bash \"$HOME/.local/bin/agent-tmux-status\" hook codex"}]}];
   .hooks = ((.hooks // {})
     | map_values(map(.hooks |= map(select(ours | not))) | map(select(.hooks | length > 0)))
     | with_entries(select(.value | length > 0)))
-  | .hooks.UserPromptSubmit  += hook("working")
-  | .hooks.PermissionRequest += hook("waiting")
-  | .hooks.PreToolUse        += [hook("waiting")[0] + {matcher: "request_user_input"}]
-  | .hooks.PostToolUse       += hook("resume")
-  | .hooks.Stop              += hook("done")
-  | .hooks.Interrupt         += hook("interrupted")
-  | .hooks.SessionEnd        += hook("reset")
+  | reduce ("UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest",
+            "SubagentStart", "SubagentStop", "Stop", "Interrupt",
+            "SessionStart", "SessionEnd") as $e (.; .hooks[$e] += hook)
 '
